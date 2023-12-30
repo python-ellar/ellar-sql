@@ -82,9 +82,7 @@ python_version = "3.8"
 show_error_codes = true
 pretty = true
 strict = true
-# db.Model attribute doesn't recognize subclassing
 disable_error_code = ["name-defined", 'union-attr']
-# db.Model is Any
 disallow_subclassing_any = false
 [[tool.mypy.overrides]]
 module = "ellar_sqlalchemy.cli.commands"
