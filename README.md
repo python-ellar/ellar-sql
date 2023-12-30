@@ -15,6 +15,7 @@
 - Documentation
 - File Field
 - Image Field
+- Tests
 
 ## Introduction
 Ellar SQLAlchemy Module simplifies the integration of SQLAlchemy and Alembic migration tooling into your ellar application.
