@@ -1,0 +1,94 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "ellar_sqlalchemy"
+
+
+[project]
+name = "ellar-sqlalchemy"
+authors = [
+   {name = "Ezeudoh Tochukwu", email = "tochukwu.ezeudoh@gmail.com"},
+]
+dynamic = ["version", "description"]
+requires-python = ">=3.8"
+readme = "README.md"
+home-page = "https://github.com/python-ellar/ellar-sqlalchemy"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+dependencies = [
+    "ellar >= 0.6.2",
+    "sqlalchemy >=2.0.16",
+    "alembic >= 1.10.0",
+]
+
+dev = [
+    "pre-commit"
+]
+
+[project.urls]
+Documentation = "https://github.com/python-ellar/ellar-sqlalchemy"
+Source = "https://github.com/python-ellar/ellar-sqlalchemy"
+Homepage = "https://python-ellar.github.io/ellar-sqlalchemy/"
+"Bug Tracker" = "https://github.com/python-ellar/ellar-sqlalchemy/issues"
+
+[project.optional-dependencies]
+test = [
+    "pytest >= 7.1.3,<8.0.0",
+    "pytest-cov >= 2.12.0,<5.0.0",
+    "ruff ==0.1.7",
+    "mypy == 1.7.1",
+    "autoflake",
+]
+
+[tool.ruff]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.isort]
+known-third-party = ["ellar"]
+
+[tool.mypy]
+python_version = "3.8"
+show_error_codes = true
+pretty = true
+strict = true
+# db.Model attribute doesn't recognize subclassing
+disable_error_code = ["name-defined", 'union-attr']
+# db.Model is Any
+disallow_subclassing_any = false
+[[tool.mypy.overrides]]
+module = "ellar_sqlalchemy.cli.commands"
+ignore_errors = true
+[[tool.mypy.overrides]]
+module = "ellar_sqlalchemy.migrations.*"
+disable_error_code = ["arg-type", 'union-attr']
