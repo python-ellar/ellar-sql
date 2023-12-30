@@ -1,0 +1,208 @@
+import json
+import time
+import typing as t
+import uuid
+
+from sqlalchemy import JSON, String, TypeDecorator
+from starlette.datastructures import UploadFile
+
+from fullview_trader.core.storage import BaseStorage
+from fullview_trader.core.storage.utils import get_length, get_valid_filename
+
+from .exceptions import (
+    ContentTypeValidationError,
+    InvalidFileError,
+    MaximumAllowedFileLengthError,
+)
+from .mimetypes import guess_extension, magic_mime_from_buffer
+
+T = t.TypeVar("T", bound="FileObject")
+
+
+class FileObject:
+    def __init__(
+        self,
+        *,
+        storage: BaseStorage,
+        original_filename: str,
+        uploaded_on: int,
+        content_type: str,
+        saved_filename: str,
+        extension: str,
+        file_size: int,
+    ) -> None:
+        self._storage = storage
+        self.original_filename = original_filename
+        self.uploaded_on = uploaded_on
+        self.content_type = content_type
+        self.filename = saved_filename
+        self.extension = extension
+        self.file_size = file_size
+
+    def locate(self) -> str:
+        return self._storage.locate(self.filename)
+
+    def open(self) -> t.IO:
+        return self._storage.open(self.filename)
+
+    def to_dict(self) -> dict:
+        return {
+            "original_filename": self.original_filename,
+            "uploaded_on": self.uploaded_on,
+            "content_type": self.content_type,
+            "extension": self.extension,
+            "file_size": self.file_size,
+            "saved_filename": self.filename,
+            "service_name": self._storage.service_name(),
+        }
+
+    def __str__(self) -> str:
+        return f"filename={self.filename}, content_type={self.content_type}, file_size={self.file_size}"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+class FileFieldBase(t.Generic[T]):
+    FileObject: t.Type[T] = FileObject
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "sqlite":
+            return dialect.type_descriptor(String())
+        else:
+            return dialect.type_descriptor(JSON())
+
+    def __init__(
+        self,
+        *args: t.Any,
+        storage: BaseStorage = None,
+        allowed_content_types: t.List[str] = None,
+        max_size: t.Optional[int] = None,
+        **kwargs: t.Any,
+    ):
+        if allowed_content_types is None:
+            allowed_content_types = []
+        super().__init__(*args, **kwargs)
+
+        self._storage = storage
+        self._allowed_content_types = allowed_content_types
+        self._max_size = max_size
+
+    def validate(self, file: T) -> None:
+        if self._allowed_content_types and file.content_type not in self._allowed_content_types:
+            raise ContentTypeValidationError(file.content_type, self._allowed_content_types)
+        if self._max_size and file.file_size > self._max_size:
+            raise MaximumAllowedFileLengthError(self._max_size)
+
+        self._storage.validate_file_name(file.filename)
+
+    def load_from_str(self, data: str) -> T:
+        data_dict = t.cast(t.Dict, json.loads(data))
+        return self.load(data_dict)
+
+    def load(self, data: dict) -> T:
+        if "service_name" in data:
+            data.pop("service_name")
+        return self.FileObject(storage=self._storage, **data)
+
+    def _guess_content_type(self, file: t.IO) -> str:
+        content = file.read(1024)
+
+        if isinstance(content, str):
+            content = str.encode(content)
+
+        file.seek(0)
+
+        return magic_mime_from_buffer(content)
+
+    def get_extra_file_initialization_context(self, file: UploadFile) -> dict:
+        return {}
+
+    def convert_to_file_object(self, file: UploadFile) -> T:
+        unique_name = str(uuid.uuid4())
+
+        original_filename = file.filename
+
+        # use python magic to get the content type
+        content_type = self._guess_content_type(file.file)
+        extension = guess_extension(content_type)
+
+        file_size = get_length(file.file)
+        saved_filename = f"{original_filename[:-len(extension)]}_{unique_name[:-8]}{extension}"
+        saved_filename = get_valid_filename(saved_filename)
+
+        init_kwargs = self.get_extra_file_initialization_context(file)
+        init_kwargs.update(
+            storage=self._storage,
+            original_filename=original_filename,
+            uploaded_on=int(time.time()),
+            content_type=content_type,
+            extension=extension,
+            file_size=file_size,
+            saved_filename=saved_filename,
+        )
+        return self.FileObject(**init_kwargs)
+
+    def process_bind_param_action(
+        self, value: t.Any, dialect: t.Any
+    ) -> t.Optional[t.Union[str, dict]]:
+        if value is None:
+            return value
+
+        if isinstance(value, UploadFile):
+            value.file.seek(0)  # make sure we are always at the beginning
+            file_obj = self.convert_to_file_object(value)
+            self.validate(file_obj)
+
+            self._storage.put(file_obj.filename, value.file)
+            value = file_obj
+
+        if isinstance(value, FileObject):
+            if dialect.name == "sqlite":
+                return json.dumps(value.to_dict())
+            return value.to_dict()
+
+        raise InvalidFileError()
+
+    def process_result_value_action(
+        self, value: t.Any, dialect: t.Any
+    ) -> t.Optional[t.Union[str, dict]]:
+        if value is None:
+            return value
+        else:
+            if isinstance(value, str):
+                value = self.load_from_str(value)
+            elif isinstance(value, dict):
+                value = self.load(value)
+            return value
+
+
+class FileField(FileFieldBase[FileObject], TypeDecorator):
+    """
+    Provide SqlAlchemy TypeDecorator for saving files
+    ## Basic Usage
+
+    fs = FileSystemStorage('path/to/save/files')
+
+    class MyTable(Base):
+        image: FileField.FileObject = sa.Column(
+            ImageFileField(storage=fs, max_size=10*MB, allowed_content_type=["application/pdf"]),
+            nullable=True
+        )
+
+    def route(file: File[UploadFile]):
+        session = SessionLocal()
+        my_table_model = MyTable(image=file)
+        session.add(my_table_model)
+        session.commit()
+        return my_table_model.image.to_dict()
+
+    """
+
+    impl = JSON
+
+    def process_bind_param(self, value, dialect):
+        return self.process_bind_param_action(value, dialect)
+
+    def process_result_value(self, value, dialect):
+        return self.process_result_value_action(value, dialect)
