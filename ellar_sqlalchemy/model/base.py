@@ -1,13 +1,14 @@
 import types
 import typing as t
 
+import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import DeclarativeBase
 
 from ellar_sqlalchemy.constant import (
     DATABASE_BIND_KEY,
     DEFAULT_KEY,
+    NAMING_CONVERSION,
 )
 
 from .database_binds import get_database_bind, has_database_bind, update_database_binds
@@ -70,7 +71,7 @@ def _model_as_base(
         return SQLAlchemyDefaultBase
 
 
-class ModelMeta(type(DeclarativeBase)):  # type:ignore[misc]
+class ModelMeta(type(sa_orm.DeclarativeBase)):  # type:ignore[misc]
     def __new__(
         mcs,
         name: str,
@@ -92,11 +93,20 @@ class ModelMeta(type(DeclarativeBase)):  # type:ignore[misc]
 
         if not skip_default_base_check:
             if SQLAlchemyDefaultBase is None:
-                raise Exception(
-                    "EllarSQLAlchemy Default Declarative Base has not been configured."
-                    "\nPlease call `configure_model_declarative_base` before ORM Model construction"
-                    " or Use EllarSQLAlchemy Service"
+                # raise Exception(
+                #     "EllarSQLAlchemy Default Declarative Base has not been configured."
+                #     "\nPlease call `configure_model_declarative_base` before ORM Model construction"
+                #     " or Use EllarSQLAlchemy Service"
+                # )
+                _model_as_base(
+                    "SQLAlchemyDefaultBase",
+                    (),
+                    {
+                        "skip_default_base_check": True,
+                        "metadata": sa.MetaData(naming_convention=NAMING_CONVERSION),
+                    },
                 )
+                _bases = [SQLAlchemyDefaultBase, *_bases]
             elif SQLAlchemyDefaultBase and SQLAlchemyDefaultBase not in _bases:
                 _bases = [SQLAlchemyDefaultBase, *_bases]
 

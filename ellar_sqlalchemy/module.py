@@ -23,7 +23,10 @@ from .schemas import MigrationOption, SQLAlchemyConfig
 class EllarSQLAlchemyModule(ModuleBase, IModuleSetup, IApplicationShutdown):
     async def on_shutdown(self) -> None:
         db_service = current_injector.get(EllarSQLAlchemyService)
-        db_service.session_factory.remove()
+        res = db_service.session_factory.remove()
+
+        if isinstance(res, t.Coroutine):
+            await res
 
     @classmethod
     def setup(

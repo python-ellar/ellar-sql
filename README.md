@@ -10,11 +10,8 @@
 
 ## Project Status
 - 70% done
-- SQLAlchemy Table support with ModelSession
-- Migration custom revision directives
+- tests
 - Documentation
-- File Field
-- Image Field
 
 ## Introduction
 Ellar SQLAlchemy Module simplifies the integration of SQLAlchemy and Alembic migration tooling into your ellar application.

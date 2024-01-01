@@ -1,43 +1,18 @@
 import typing as t
-from dataclasses import dataclass
 from io import SEEK_END, BytesIO
 
-from sqlalchemy import JSON, TypeDecorator
+import sqlalchemy as sa
+from ellar.core.files.storages import BaseStorage
+from PIL import Image
 from starlette.datastructures import UploadFile
 
-from .exceptions import InvalidImageOperationError
-
-try:
-    from PIL import Image
-except ImportError as im_ex:  # pragma: no cover
-    raise Exception("Pillow package is required. Use `pip install Pillow`.") from im_ex
-
-from fullview_trader.core.storage import BaseStorage
-
-from .file import FileFieldBase, FileObject
+from ..exceptions import InvalidImageOperationError
+from ..file import FileFieldBase
+from .crop_info import CroppingDetails
+from .file_info import ImageFileObject
 
 
-@dataclass
-class CroppingDetails:
-    x: int
-    y: int
-    height: int
-    width: int
-
-
-class ImageFileObject(FileObject):
-    def __init__(self, *, height: float, width: float, **kwargs: t.Any) -> None:
-        super().__init__(**kwargs)
-        self.height = height
-        self.width = width
-
-    def to_dict(self) -> dict:
-        data = super().to_dict()
-        data.update(height=self.height, width=self.width)
-        return data
-
-
-class ImageFileField(FileFieldBase[ImageFileObject], TypeDecorator):
+class ImageFileField(FileFieldBase[ImageFileObject], sa.TypeDecorator):  # type: ignore[type-arg]
     """
     Provide SqlAlchemy TypeDecorator for Image files
     ## Basic Usage
@@ -70,7 +45,7 @@ class ImageFileField(FileFieldBase[ImageFileObject], TypeDecorator):
 
     """
 
-    impl = JSON
+    impl = sa.JSON
     FileObject = ImageFileObject
 
     def __init__(
@@ -79,19 +54,25 @@ class ImageFileField(FileFieldBase[ImageFileObject], TypeDecorator):
         storage: BaseStorage,
         max_size: t.Optional[int] = None,
         crop: t.Optional[CroppingDetails] = None,
-        **kwargs: t.Any
+        **kwargs: t.Any,
     ):
         kwargs.setdefault("allowed_content_types", ["image/jpeg", "image/png"])
         super().__init__(*args, storage=storage, max_size=max_size, **kwargs)
         self.crop = crop
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(
+        self, value: t.Optional[t.Any], dialect: sa.Dialect
+    ) -> t.Any:
         return self.process_bind_param_action(value, dialect)
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(
+        self, value: t.Optional[t.Any], dialect: sa.Dialect
+    ) -> t.Any:
         return self.process_result_value_action(value, dialect)
 
-    def get_extra_file_initialization_context(self, file: UploadFile) -> dict:
+    def get_extra_file_initialization_context(
+        self, file: UploadFile
+    ) -> t.Dict[str, t.Any]:
         with Image.open(file.file) as image:
             width, height = image.size
             return {"width": width, "height": height}
@@ -101,7 +82,12 @@ class ImageFileField(FileFieldBase[ImageFileObject], TypeDecorator):
     ) -> UploadFile:
         crop_info = crop or self.crop
         img = Image.open(file.file)
-        (height, width, x, y,) = (
+        (
+            height,
+            width,
+            x,
+            y,
+        ) = (
             crop_info.height,
             crop_info.width,
             crop_info.x,
@@ -131,11 +117,13 @@ class ImageFileField(FileFieldBase[ImageFileObject], TypeDecorator):
         return content
 
     def process_bind_param_action(
-        self, value: t.Any, dialect: t.Any
-    ) -> t.Optional[t.Union[str, dict]]:
+        self, value: t.Optional[t.Any], dialect: sa.Dialect
+    ) -> t.Optional[t.Union[str, t.Dict[str, t.Any]]]:
         if isinstance(value, tuple):
             file, crop_data = value
-            if not isinstance(file, UploadFile) or not isinstance(crop_data, CroppingDetails):
+            if not isinstance(file, UploadFile) or not isinstance(
+                crop_data, CroppingDetails
+            ):
                 raise InvalidImageOperationError(
                     "Invalid data was provided for ImageFileField. "
                     "Accept values: UploadFile or (UploadFile, CroppingDetails)"
