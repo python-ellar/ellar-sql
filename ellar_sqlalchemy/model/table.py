@@ -4,7 +4,7 @@ import sqlalchemy as sa
 import sqlalchemy.sql.schema as sa_sql_schema
 
 from ellar_sqlalchemy.constant import DEFAULT_KEY
-from ellar_sqlalchemy.model import make_metadata
+from ellar_sqlalchemy.model.utils import make_metadata
 
 
 class Table(sa.Table):

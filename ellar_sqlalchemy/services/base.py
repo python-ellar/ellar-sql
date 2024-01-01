@@ -2,7 +2,6 @@ import os
 import typing as t
 from threading import get_ident
 from weakref import WeakKeyDictionary
-
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as sa_orm
