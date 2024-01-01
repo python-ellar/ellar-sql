@@ -10,7 +10,7 @@
 
 ## Project Status
 - 70% done
-- tests
+- Tests
 - Documentation
 
 ## Introduction
