@@ -33,8 +33,11 @@ classifiers = [
 
 dependencies = [
     "ellar >= 0.6.2",
-    "sqlalchemy >=2.0.16",
+    "sqlalchemy >=2.0.23",
     "alembic >= 1.10.0",
+    "alembic >= 1.10.0",
+    "python-magic >= 0.4.27",
+    "pillow >= 10.1.0"
 ]
 
 dev = [
@@ -54,6 +57,7 @@ test = [
     "ruff ==0.1.9",
     "mypy == 1.7.1",
     "autoflake",
+    "types-Pillow",
 ]
 
 [tool.ruff]

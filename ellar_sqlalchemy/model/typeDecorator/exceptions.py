@@ -1,6 +1,12 @@
-class ContentTypeValidationError(Exception):
-    def __init__(self, content_type=None, valid_content_types=None):
+import typing as t
 
+
+class ContentTypeValidationError(Exception):
+    def __init__(
+        self,
+        content_type: t.Optional[str] = None,
+        valid_content_types: t.Optional[t.List[str]] = None,
+    ) -> None:
         if content_type is None:
             message = "Content type is not provided. "
         else:
@@ -21,5 +27,5 @@ class InvalidImageOperationError(Exception):
 
 
 class MaximumAllowedFileLengthError(Exception):
-    def __init__(self, max_length: int):
+    def __init__(self, max_length: int) -> None:
         super().__init__("Cannot store files larger than: %d bytes" % max_length)

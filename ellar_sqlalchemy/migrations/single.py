@@ -53,16 +53,13 @@ class SingleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         key, engine = self.db_service.engines.popitem()
         metadata = get_database_bind(key, certain=True)
 
+        conf_args = self.get_user_context_configurations()
+
         context.configure(
             url=str(engine.url).replace("%", "%%"),
             target_metadata=metadata,
             literal_binds=True,
-            dialect_opts={"paramstyle": "named"},
-            # If you want to ignore things like these, set the following as a class attribute
-            # __table_args__ = {"info": {"skip_autogen": True}}
-            include_object=self.include_object,
-            # detecting type changes
-            # compare_type=True,
+            **conf_args,
         )
 
         with context.begin_transaction():
@@ -77,12 +74,10 @@ class SingleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         # this callback is used to prevent an auto-migration from being generated
         # when there are no changes to the schema
         # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
-        conf_args = {
-            "process_revision_directives": self.default_process_revision_directives
-        }
-        # conf_args = current_app.extensions['migrate'].configure_args
-        # if conf_args.get("process_revision_directives") is None:
-        #     conf_args["process_revision_directives"] = process_revision_directives
+        conf_args = self.get_user_context_configurations()
+        conf_args.setdefault(
+            "process_revision_directives", self.default_process_revision_directives
+        )
 
         context.configure(connection=connection, target_metadata=metadata, **conf_args)
 

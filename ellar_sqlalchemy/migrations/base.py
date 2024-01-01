@@ -18,6 +18,18 @@ class AlembicEnvMigrationBase:
         self.db_service = db_service
         self.use_two_phase = db_service.migration_options.use_two_phase
 
+    def get_user_context_configurations(self) -> t.Dict[str, t.Any]:
+        conf_args = dict(self.db_service.migration_options.context_configure)
+
+        # detecting type changes
+        conf_args.setdefault("compare_type", True)
+        conf_args.setdefault("render_as_batch", True)
+        # If you want to ignore things like these, set the following as a class attribute
+        # __table_args__ = {"info": {"skip_autogen": True}}
+        conf_args.setdefault("include_object", self.include_object)
+        conf_args.setdefault("dialect_opts", {"paramstyle": "named"})
+        return conf_args
+
     def include_object(
         self,
         obj: SchemaItem,

@@ -96,6 +96,8 @@ class MultipleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         # for --sql use case, run migrations for each URL into
         # individual files.
 
+        conf_args = self.get_user_context_configurations()
+
         for key, engine in self.db_service.engines.items():
             logger.info("Migrating database %s" % key)
 
@@ -104,18 +106,14 @@ class MultipleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
 
             file_ = "%s.sql" % key
             logger.info("Writing output to %s" % file_)
+
             with open(file_, "w") as buffer:
                 context.configure(
                     url=url,
                     output_buffer=buffer,
                     target_metadata=metadata,
                     literal_binds=True,
-                    dialect_opts={"paramstyle": "named"},
-                    # If you want to ignore things like these, set the following as a class attribute
-                    # __table_args__ = {"info": {"skip_autogen": True}}
-                    include_object=self.include_object,
-                    # detecting type changes
-                    # compare_type=True,
+                    **conf_args,
                 )
                 with context.begin_transaction():
                     context.run_migrations(engine_name=key)
@@ -126,12 +124,11 @@ class MultipleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         # this callback is used to prevent an auto-migration from being generated
         # when there are no changes to the schema
         # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
-        conf_args = {
-            "process_revision_directives": self.default_process_revision_directives
-        }
-        # conf_args = current_app.extensions['migrate'].configure_args
-        # if conf_args.get("process_revision_directives") is None:
-        #     conf_args["process_revision_directives"] = process_revision_directives
+
+        conf_args = self.get_user_context_configurations()
+        conf_args.setdefault(
+            "process_revision_directives", self.default_process_revision_directives
+        )
 
         try:
             for db_info in db_infos:
