@@ -93,7 +93,7 @@ def test_other_alembic_commands():
     # Edit Command
     result = run_command("default.py db edit")
     assert result.returncode == 1
-    assert b"TERM environment variable not set." in result.stderr
+    assert b"Error: Error executing editor" in result.stderr
 
     # Merge Command
     result = run_command("default.py db merge")
