@@ -2,12 +2,13 @@ import os
 import typing as t
 from threading import get_ident
 from weakref import WeakKeyDictionary
+
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as sa_orm
+from ellar.common.exceptions import ImproperConfiguration
 from ellar.common.utils.importer import (
     get_main_directory_by_stack,
-    import_from_string,
     module_import,
 )
 from ellar.events import app_context_teardown_events
@@ -19,43 +20,15 @@ from sqlalchemy.ext.asyncio import (
 
 from ellar_sqlalchemy.constant import (
     DEFAULT_KEY,
-    DeclarativeBasePlaceHolder,
 )
 from ellar_sqlalchemy.model import (
     make_metadata,
 )
-from ellar_sqlalchemy.model.base import Model
 from ellar_sqlalchemy.model.database_binds import get_database_bind, get_database_binds
 from ellar_sqlalchemy.schemas import MigrationOption
 from ellar_sqlalchemy.session import ModelSession
 
 from .metadata_engine import MetaDataEngine
-
-
-def _configure_model(
-    self: "EllarSQLAlchemyService",
-    models: t.Optional[t.List[str]] = None,
-) -> None:
-    for model in models or []:
-        module_import(model)
-
-    def model_get_session(
-        cls: t.Type[Model],
-    ) -> t.Union[sa_orm.Session, AsyncSession, t.Any]:
-        return self.session_factory()
-
-    sql_alchemy_declarative_base = import_from_string(
-        "ellar_sqlalchemy.model.base:SQLAlchemyDefaultBase"
-    )
-    base = (
-        Model if sql_alchemy_declarative_base is None else sql_alchemy_declarative_base
-    )
-
-    get_db_session = getattr(base, "get_db_session", DeclarativeBasePlaceHolder)
-    get_db_session_name = get_db_session.__name__ if get_db_session else ""
-
-    if get_db_session_name != "model_get_session":
-        base.get_db_session = classmethod(model_get_session)
 
 
 class EllarSQLAlchemyService:
@@ -79,14 +52,13 @@ class EllarSQLAlchemyService:
         self._session_options = common_session_options or {}
 
         self._common_engine_options = common_engine_options or {}
-        self._execution_path = get_main_directory_by_stack(root_path, 2)  # type:ignore[arg-type]
+        self._execution_path = get_main_directory_by_stack(root_path or "__main__", 2)
 
         self.migration_options = migration_options or MigrationOption(
-            directory=get_main_directory_by_stack(
-                self._execution_path or "__main__/migrations", 2
-            )
+            directory="migrations"
         )
-        self._async_session_type: bool = False
+        self.migration_options.validate_directory(self._execution_path)
+        self._has_async_engine_driver: bool = False
 
         self._setup(databases, models=models, echo=echo)
         self.session_factory = self.get_scoped_session()
@@ -96,6 +68,10 @@ class EllarSQLAlchemyService:
         res = self.session_factory.remove()
         if isinstance(res, t.Coroutine):
             await res
+
+    @property
+    def has_async_engine_driver(self) -> bool:
+        return self._has_async_engine_driver
 
     @property
     def engines(self) -> t.Dict[str, sa.Engine]:
@@ -114,7 +90,9 @@ class EllarSQLAlchemyService:
         models: t.Optional[t.List[str]] = None,
         echo: bool = False,
     ) -> None:
-        _configure_model(self, models)
+        for model in models or []:
+            module_import(model)
+
         self._build_engines(databases, echo)
 
     def _build_engines(
@@ -136,12 +114,12 @@ class EllarSQLAlchemyService:
                 else:
                     engine_options[key].update(value)
         else:
-            raise RuntimeError(
+            raise ImproperConfiguration(
                 "Invalid databases data structure. Allowed datastructure, str or dict data type"
             )
 
         if DEFAULT_KEY not in engine_options:
-            raise RuntimeError(
+            raise ImproperConfiguration(
                 f"`default` database must be present in databases parameter: {databases}"
             )
 
@@ -164,7 +142,7 @@ class EllarSQLAlchemyService:
                 "Databases Configuration must either be all async or all synchronous type"
             )
 
-        self._async_session_type = bool(len(found_async_engine))
+        self._has_async_engine_driver = bool(len(found_async_engine))
 
     def __validate_databases_input(self, *databases: str) -> t.Union[str, t.List[str]]:
         _databases: t.Union[str, t.List[str]] = list(databases)
@@ -177,7 +155,7 @@ class EllarSQLAlchemyService:
 
         metadata_engines = self._get_metadata_and_engine(_databases)
 
-        if self._async_session_type and _databases == "__all__":
+        if self.has_async_engine_driver and _databases == "__all__":
             raise Exception(
                 "You are using asynchronous database configuration. Use `create_all_async` instead"
             )
@@ -190,7 +168,7 @@ class EllarSQLAlchemyService:
 
         metadata_engines = self._get_metadata_and_engine(_databases)
 
-        if self._async_session_type and _databases == "__all__":
+        if self.has_async_engine_driver and _databases == "__all__":
             raise Exception(
                 "You are using asynchronous database configuration. Use `drop_all_async` instead"
             )
@@ -203,7 +181,7 @@ class EllarSQLAlchemyService:
 
         metadata_engines = self._get_metadata_and_engine(_databases)
 
-        if self._async_session_type and _databases == "__all__":
+        if self.has_async_engine_driver and _databases == "__all__":
             raise Exception(
                 "You are using asynchronous database configuration. Use `reflect_async` instead"
             )
@@ -257,7 +235,7 @@ class EllarSQLAlchemyService:
 
         factory = self._make_session_factory(options)
 
-        if self._async_session_type:
+        if self.has_async_engine_driver:
             return async_scoped_session(factory, scope)  # type:ignore[arg-type]
 
         return sa_orm.scoped_session(factory, scope)  # type:ignore[arg-type]
@@ -265,7 +243,7 @@ class EllarSQLAlchemyService:
     def _make_session_factory(
         self, options: t.Dict[str, t.Any]
     ) -> t.Union[sa_orm.sessionmaker[sa_orm.Session], async_sessionmaker[AsyncSession]]:
-        if self._async_session_type:
+        if self.has_async_engine_driver:
             options.setdefault("sync_session_class", ModelSession)
         else:
             options.setdefault("class_", ModelSession)
@@ -275,7 +253,7 @@ class EllarSQLAlchemyService:
         if session_class is ModelSession or issubclass(session_class, ModelSession):
             options.update(engines=self._engines[self])
 
-        if self._async_session_type:
+        if self.has_async_engine_driver:
             return async_sessionmaker(**options)
 
         return sa_orm.sessionmaker(**options)
@@ -308,7 +286,7 @@ class EllarSQLAlchemyService:
                     if is_uri:
                         db_str = f"file:{db_str}"
 
-                    options["url"] = url.set(database=db_str)
+                options["url"] = url.set(database=db_str)
 
         elif url.drivername.startswith("mysql"):
             # set queue defaults only when using queue pool

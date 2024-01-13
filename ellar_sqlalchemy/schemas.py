@@ -1,7 +1,28 @@
+import os.path
 import typing as t
 from dataclasses import asdict, dataclass, field
 
 import ellar.common as ecm
+import sqlalchemy.orm as sa_orm
+
+
+@dataclass
+class ModelBaseConfig:
+    use_bases: t.Sequence[
+        t.Union[
+            t.Type[t.Union[sa_orm.DeclarativeBase, sa_orm.DeclarativeBaseNoMeta]],
+            sa_orm.DeclarativeMeta,
+            t.Any,
+        ]
+    ] = field(default_factory=lambda: [])
+
+    make_declarative_base: bool = False
+    _use: t.Optional[t.Type[t.Any]] = None
+
+    # def get_use_type(self) -> t.Type[t.Any]:
+    #     if not self._use:
+    #         self._use = types.new_class("SQLAlchemyBase", tuple(self.use_bases), {})
+    #     return self._use
 
 
 @dataclass
@@ -13,6 +34,10 @@ class MigrationOption:
     def dict(self) -> t.Dict[str, t.Any]:
         return asdict(self)
 
+    def validate_directory(self, root_path: str) -> None:
+        if not os.path.isabs(self.directory):
+            self.directory = os.path.join(root_path, self.directory)
+
 
 class SQLAlchemyConfig(ecm.Serializer):
     # model_config = {"arbitrary_types_allowed": True}
@@ -21,7 +46,7 @@ class SQLAlchemyConfig(ecm.Serializer):
     migration_options: MigrationOption
     root_path: str
 
-    session_options: t.Dict[str, t.Any] = {
+    session_options: t.Optional[t.Dict[str, t.Any]] = {
         "autoflush": False,
         "future": True,
         "expire_on_commit": False,

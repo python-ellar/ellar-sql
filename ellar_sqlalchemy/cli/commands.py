@@ -1,4 +1,4 @@
-import click
+import ellar_cli.click as click
 from ellar.app import current_injector
 
 from ellar_sqlalchemy.services import EllarSQLAlchemyService
@@ -6,15 +6,15 @@ from ellar_sqlalchemy.services import EllarSQLAlchemyService
 from .handlers import CLICommandHandlers
 
 
+def _get_handler_context(ctx: click.Context) -> CLICommandHandlers:
+    db_service = current_injector.get(EllarSQLAlchemyService)
+    return CLICommandHandlers(db_service)
+
+
 @click.group()
 def db():
     """- Perform Alembic Database Commands -"""
     pass
-
-
-def _get_handler_context(ctx: click.Context) -> CLICommandHandlers:
-    db_service = current_injector.get(EllarSQLAlchemyService)
-    return CLICommandHandlers(db_service)
 
 
 @db.command()
@@ -385,7 +385,21 @@ def stamp(ctx: click.Context, directory, sql, tag, revision):
     handler.stamp(directory, revision, sql, tag)
 
 
-@db.command("init-migration")
+@db.command()
+@click.option(
+    "-d",
+    "--directory",
+    default=None,
+    help='Migration script directory (default is "migrations")',
+)
+@click.pass_context
+def check(ctx: click.Context, directory):
+    """Check if there are any new operations to migrate"""
+    handler = _get_handler_context(ctx)
+    handler.check(directory)
+
+
+@db.command("init")
 @click.option(
     "-d",
     "--directory",

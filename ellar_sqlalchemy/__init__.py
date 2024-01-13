@@ -3,6 +3,12 @@
 __version__ = "0.0.1"
 
 from .module import EllarSQLAlchemyModule
+from .schemas import MigrationOption, SQLAlchemyConfig
 from .services import EllarSQLAlchemyService
 
-__all__ = ["EllarSQLAlchemyModule", "EllarSQLAlchemyService"]
+__all__ = [
+    "EllarSQLAlchemyModule",
+    "EllarSQLAlchemyService",
+    "SQLAlchemyConfig",
+    "MigrationOption",
+]

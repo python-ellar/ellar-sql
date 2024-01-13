@@ -21,6 +21,6 @@ build-backend = "poetry.core.masonry.api"
 default = "single_db"
 [ellar.projects.single_db]
 project-name = "single_db"
-application = "single_db.server:application"
+application = "single_db.server:bootstrap"
 config = "single_db.config:DevelopmentConfig"
 root-module = "single_db.root_module:ApplicationModule"

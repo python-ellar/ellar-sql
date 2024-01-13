@@ -6,7 +6,7 @@ from ellar.app import current_injector
 from ellar.common import IApplicationShutdown, IModuleSetup, Module
 from ellar.common.utils.importer import get_main_directory_by_stack
 from ellar.core import Config, DynamicModule, ModuleBase, ModuleSetup
-from ellar.di import ProviderConfig, request_scope
+from ellar.di import ProviderConfig, request_or_transient_scope
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -38,31 +38,22 @@ class EllarSQLAlchemyModule(ModuleBase, IModuleSetup, IApplicationShutdown):
         engine_options: t.Optional[t.Dict[str, t.Any]] = None,
         models: t.Optional[t.List[str]] = None,
         echo: bool = False,
+        root_path: t.Optional[str] = None,
     ) -> "DynamicModule":
         """
         Configures EllarSQLAlchemyModule and setup required providers.
         """
-        root_path = get_main_directory_by_stack("__main__", stack_level=2)
-        if isinstance(migration_options, dict):
-            migration_options.update(
-                directory=get_main_directory_by_stack(
-                    migration_options.get("directory", "__main__/migrations"),
-                    stack_level=2,
-                    from_dir=root_path,
-                )
-            )
+        root_path = root_path or get_main_directory_by_stack("__main__", stack_level=2)
         if isinstance(migration_options, MigrationOption):
-            migration_options.directory = get_main_directory_by_stack(
-                migration_options.directory, stack_level=2, from_dir=root_path
-            )
             migration_options = migration_options.dict()
-
+        migration_options.setdefault("directory", "migrations")
         schema = SQLAlchemyConfig.model_validate(
             {
                 "databases": databases,
                 "engine_options": engine_options,
                 "echo": echo,
                 "models": models,
+                "session_options": session_options,
                 "migration_options": migration_options,
                 "root_path": root_path,
             },
@@ -83,13 +74,13 @@ class EllarSQLAlchemyModule(ModuleBase, IModuleSetup, IApplicationShutdown):
         )
         providers: t.List[t.Any] = []
 
-        if db_service._async_session_type:
+        if db_service.has_async_engine_driver:
             providers.append(ProviderConfig(AsyncEngine, use_value=db_service.engine))
             providers.append(
                 ProviderConfig(
                     AsyncSession,
                     use_value=lambda: db_service.session_factory(),
-                    scope=request_scope,
+                    scope=request_or_transient_scope,
                 )
             )
         else:
@@ -98,7 +89,7 @@ class EllarSQLAlchemyModule(ModuleBase, IModuleSetup, IApplicationShutdown):
                 ProviderConfig(
                     Session,
                     use_value=lambda: db_service.session_factory(),
-                    scope=request_scope,
+                    scope=request_or_transient_scope,
                 )
             )
 
@@ -134,15 +125,18 @@ class EllarSQLAlchemyModule(ModuleBase, IModuleSetup, IApplicationShutdown):
         if config.get("SQLALCHEMY_CONFIG") and isinstance(
             config.SQLALCHEMY_CONFIG, dict
         ):
-            defined_config = dict(config.SQLALCHEMY_CONFIG, root_path=root_path)
+            defined_config = dict(config.SQLALCHEMY_CONFIG)
             defined_config.update(override_config)
+            defined_config.setdefault("root_path", root_path)
 
             schema = SQLAlchemyConfig.model_validate(
                 defined_config, from_attributes=True
             )
 
             schema.migration_options.directory = get_main_directory_by_stack(
-                schema.migration_options.directory, stack_level=2, from_dir=root_path
+                schema.migration_options.directory,
+                stack_level=2,
+                from_dir=defined_config["root_path"],
             )
 
             return module.__setup_module(schema)

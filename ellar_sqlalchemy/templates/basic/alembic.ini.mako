@@ -11,7 +11,7 @@ file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(re
 
 # Logging configuration
 [loggers]
-keys = root,sqlalchemy,alembic,flask_migrate
+keys = root,sqlalchemy,alembic,ellar_sqlalchemy_migrate
 
 [handlers]
 keys = console
@@ -34,7 +34,7 @@ level = INFO
 handlers =
 qualname = alembic
 
-[logger_flask_migrate]
+[logger_ellar_sqlalchemy_migrate]
 level = INFO
 handlers =
 qualname = flask_migrate

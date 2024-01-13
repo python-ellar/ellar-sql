@@ -76,7 +76,7 @@ class DevelopmentConfig(BaseConfig):
         },
         'echo': True,
         'migration_options': {
-            'directory': '__main__/migrations'
+            'directory': 'migrations' # root directory will be determined based on where the module is instantiated.
         },
         'models': ['db.models']
     }

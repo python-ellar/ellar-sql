@@ -5,7 +5,7 @@ from io import BytesIO
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
 
-from ellar_sqlalchemy.constant import DATABASE_BIND_KEY, DEFAULT_KEY
+from ellar_sqlalchemy.constant import DATABASE_BIND_KEY, DEFAULT_KEY, NAMING_CONVERSION
 
 from .database_binds import get_database_bind, has_database_bind, update_database_binds
 
@@ -33,11 +33,11 @@ def make_metadata(database_key: str) -> sa.MetaData:
     if has_database_bind(database_key):
         return get_database_bind(database_key, certain=True)
 
-    if database_key is not None:
+    if database_key != DEFAULT_KEY:
         # Copy the naming convention from the default metadata.
         naming_convention = make_metadata(DEFAULT_KEY).naming_convention
     else:
-        naming_convention = None
+        naming_convention = NAMING_CONVERSION
 
     # Set the bind key in info to be used by session.get_bind.
     metadata = sa.MetaData(

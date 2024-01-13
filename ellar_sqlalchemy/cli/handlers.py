@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import logging
 import os
-import sys
 import typing as t
 from functools import wraps
 from pathlib import Path
 
+import click
 from alembic import command
 from alembic.config import Config as AlembicConfig
 from alembic.util.exc import CommandError
@@ -15,7 +14,6 @@ from ellar.app import App
 
 from ellar_sqlalchemy.services import EllarSQLAlchemyService
 
-log = logging.getLogger(__name__)
 RevIdType = t.Union[str, t.List[str], t.Tuple[str, ...]]
 
 
@@ -31,8 +29,7 @@ def _catch_errors(f: t.Callable) -> t.Callable:  # type:ignore[type-arg]
         try:
             f(*args, **kwargs)
         except (CommandError, RuntimeError) as exc:
-            log.error("Error: " + str(exc))
-            sys.exit(1)
+            raise click.ClickException(str(exc)) from exc
 
     return wrapped
 

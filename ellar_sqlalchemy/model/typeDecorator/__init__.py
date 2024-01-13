@@ -1,6 +1,6 @@
 from .file import FileField, FileFieldBase, FileObject
 from .guid import GUID
-from .image import CroppingDetails, ImageFileField
+from .image import CroppingDetails, ImageFileField, ImageFileObject
 from .ipaddress import GenericIP
 
 __all__ = [
@@ -11,4 +11,5 @@ __all__ = [
     "ImageFileField",
     "FileObject",
     "FileFieldBase",
+    "ImageFileObject",
 ]
