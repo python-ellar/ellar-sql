@@ -9,6 +9,7 @@
 [![PyPI version](https://img.shields.io/pypi/pyversions/ellar-sqlachemy.svg)](https://pypi.python.org/pypi/ellar-sqlachemy)
 
 ## Project Status
+
 [] Overall Completion - 80% done
 [] Tests - 90% Complete
 [x] Model class to create SQLAlchemy Models and Declarative Base
