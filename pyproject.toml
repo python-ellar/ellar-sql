@@ -57,7 +57,7 @@ test = [
     "mypy == 1.8.0",
     "autoflake",
     "types-Pillow",
-    "ellar-cli >= 0.3.4",
+    "ellar-cli >= 0.3.3",
 ]
 
 [tool.ruff]
