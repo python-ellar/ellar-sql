@@ -3,7 +3,7 @@
 </p>
 
 ![Test](https://github.com/python-ellar/ellar-sqlachemy/actions/workflows/test_full.yml/badge.svg)
-![Coverage](https://img.shields.io/codecov/c/github/python-ellar/ellar-sqlachemy)
+![Coverage](https://img.shields.io/codecov/c/github/python-ellar/ellar-sqlalchemy)
 [![PyPI version](https://badge.fury.io/py/ellar-sqlachemy.svg)](https://badge.fury.io/py/ellar-sqlachemy)
 [![PyPI version](https://img.shields.io/pypi/v/ellar-sqlachemy.svg)](https://pypi.python.org/pypi/ellar-sqlachemy)
 [![PyPI version](https://img.shields.io/pypi/pyversions/ellar-sqlachemy.svg)](https://pypi.python.org/pypi/ellar-sqlachemy)
