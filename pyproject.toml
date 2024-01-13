@@ -54,6 +54,7 @@ test = [
     "pytest >= 7.1.3,<8.0.0",
     "pytest-cov >= 2.12.0,<5.0.0",
     "pytest-asyncio",
+    "aiosqlite",
     "ruff ==0.1.9",
     "mypy == 1.8.0",
     "autoflake",
