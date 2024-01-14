@@ -7,6 +7,7 @@ from .file_info import FileObject
 
 
 class FileField(FileFieldBase[FileObject], sa.TypeDecorator):  # type: ignore[type-arg]
+
     """
     Provide SqlAlchemy TypeDecorator for saving files
     ## Basic Usage
@@ -27,6 +28,10 @@ class FileField(FileFieldBase[FileObject], sa.TypeDecorator):  # type: ignore[ty
         return my_table_model.image.to_dict()
 
     """
+
+    @property
+    def file_object_type(self) -> t.Type[FileObject]:
+        return FileObject
 
     impl = sa.JSON
 
