@@ -55,7 +55,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from ellar_sqlalchemy.model import Model
 
 
-class Base(Model, as_base=True):
+class Base(Model):
+  __base_config__ = {'make_declarative_base': True}
   __database__ = 'default'
 
   created_date: Mapped[datetime] = mapped_column(
