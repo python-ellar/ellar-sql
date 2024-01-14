@@ -2,9 +2,9 @@ import typing as t
 from io import SEEK_END, BytesIO
 
 import sqlalchemy as sa
+from ellar.common import UploadFile
 from ellar.core.files.storages import BaseStorage
 from PIL import Image
-from starlette.datastructures import UploadFile
 
 from ..exceptions import InvalidImageOperationError
 from ..file import FileFieldBase
@@ -18,9 +18,10 @@ class ImageFileField(FileFieldBase[ImageFileObject], sa.TypeDecorator):  # type:
     ## Basic Usage
 
     class MyTable(Base):
-        image:
-        ImageFileField.FileObject = sa.Column(ImageFileField(storage=FileSystemStorage('path/to/save/files',
-        max_size=10*MB), nullable=True)
+        image: ImageFileField.FileObject = sa.Column(
+            ImageFileField(storage=FileSystemStorage('path/to/save/files', max_size=10*MB),
+            nullable=True
+        )
 
     def route(file: File[UploadFile]):
         session = SessionLocal()
@@ -46,7 +47,6 @@ class ImageFileField(FileFieldBase[ImageFileObject], sa.TypeDecorator):  # type:
     """
 
     impl = sa.JSON
-    FileObject = ImageFileObject
 
     def __init__(
         self,
@@ -59,6 +59,10 @@ class ImageFileField(FileFieldBase[ImageFileObject], sa.TypeDecorator):  # type:
         kwargs.setdefault("allowed_content_types", ["image/jpeg", "image/png"])
         super().__init__(*args, storage=storage, max_size=max_size, **kwargs)
         self.crop = crop
+
+    @property
+    def file_object_type(self) -> t.Type[ImageFileObject]:
+        return ImageFileObject
 
     def process_bind_param(
         self, value: t.Optional[t.Any], dialect: sa.Dialect
@@ -73,9 +77,12 @@ class ImageFileField(FileFieldBase[ImageFileObject], sa.TypeDecorator):  # type:
     def get_extra_file_initialization_context(
         self, file: UploadFile
     ) -> t.Dict[str, t.Any]:
-        with Image.open(file.file) as image:
-            width, height = image.size
-            return {"width": width, "height": height}
+        try:
+            with Image.open(file.file) as image:
+                width, height = image.size
+                return {"width": width, "height": height}
+        except Exception:
+            return {"width": None, "height": None}
 
     def crop_image_with_box_sizing(
         self, file: UploadFile, crop: t.Optional[CroppingDetails] = None

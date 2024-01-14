@@ -1,7 +1,7 @@
 import typing as t
 
 
-class ContentTypeValidationError(Exception):
+class ContentTypeValidationError(ValueError):
     def __init__(
         self,
         content_type: t.Optional[str] = None,
@@ -18,14 +18,14 @@ class ContentTypeValidationError(Exception):
         super().__init__(message)
 
 
-class InvalidFileError(Exception):
+class InvalidFileError(ValueError):
     pass
 
 
-class InvalidImageOperationError(Exception):
+class InvalidImageOperationError(ValueError):
     pass
 
 
-class MaximumAllowedFileLengthError(Exception):
+class MaximumAllowedFileLengthError(ValueError):
     def __init__(self, max_length: int) -> None:
         super().__init__("Cannot store files larger than: %d bytes" % max_length)

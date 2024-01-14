@@ -42,8 +42,5 @@ class FileObject:
             "service_name": self._storage.service_name(),
         }
 
-    def __str__(self) -> str:
-        return f"filename={self.filename}, content_type={self.content_type}, file_size={self.file_size}"
-
     def __repr__(self) -> str:
-        return str(self)
+        return f"<{self.__class__.__name__} filename={self.filename}, content_type={self.content_type}, file_size={self.file_size}>"

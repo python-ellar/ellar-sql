@@ -2,11 +2,12 @@ import json
 import time
 import typing as t
 import uuid
+from abc import abstractmethod
 
 import sqlalchemy as sa
+from ellar.common import UploadFile
 from ellar.core.files.storages import BaseStorage
 from ellar.core.files.storages.utils import get_valid_filename
-from starlette.datastructures import UploadFile
 
 from ellar_sqlalchemy.model.typeDecorator.exceptions import (
     ContentTypeValidationError,
@@ -25,7 +26,10 @@ T = t.TypeVar("T", bound="FileObject")
 
 
 class FileFieldBase(t.Generic[T]):
-    FileObject: t.Type[T] = t.cast(t.Type[T], FileObject)
+    @property
+    @abstractmethod
+    def file_object_type(self) -> t.Type[T]:
+        ...
 
     def load_dialect_impl(self, dialect: sa.Dialect) -> t.Any:
         if dialect.name == "sqlite":
@@ -74,7 +78,7 @@ class FileFieldBase(t.Generic[T]):
     def load(self, data: t.Dict[str, t.Any]) -> T:
         if "service_name" in data:
             data.pop("service_name")
-        return self.FileObject(storage=self.storage, **data)
+        return self.file_object_type(storage=self.storage, **data)
 
     def _guess_content_type(self, file: t.IO) -> str:  # type:ignore[type-arg]
         content = file.read(1024)
@@ -97,14 +101,15 @@ class FileFieldBase(t.Generic[T]):
         original_filename = file.filename or unique_name
 
         # use python magic to get the content type
-        content_type = self._guess_content_type(file.file)
+        content_type = self._guess_content_type(file.file) or ""
         extension = guess_extension(content_type)
-        assert extension
-
         file_size = get_length(file.file)
-        saved_filename = (
-            f"{original_filename[:-len(extension)]}_{unique_name[:-8]}{extension}"
-        )
+        if extension:
+            saved_filename = (
+                f"{original_filename[:-len(extension)]}_{unique_name[:-8]}{extension}"
+            )
+        else:
+            saved_filename = f"{unique_name[:-8]}_{original_filename}"
         saved_filename = get_valid_filename(saved_filename)
 
         init_kwargs = self.get_extra_file_initialization_context(file)
@@ -117,7 +122,7 @@ class FileFieldBase(t.Generic[T]):
             file_size=file_size,
             saved_filename=saved_filename,
         )
-        return self.FileObject(**init_kwargs)
+        return self.file_object_type(**init_kwargs)
 
     def process_bind_param_action(
         self, value: t.Optional[t.Any], dialect: sa.Dialect
@@ -138,7 +143,7 @@ class FileFieldBase(t.Generic[T]):
                 return json.dumps(value.to_dict())
             return value.to_dict()
 
-        raise InvalidFileError()
+        raise InvalidFileError(f"{value} is not supported")
 
     def process_result_value_action(
         self, value: t.Optional[t.Any], dialect: sa.Dialect
