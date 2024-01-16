@@ -10,18 +10,18 @@
 
 ## Project Status
 
-- [ ] Overall Completion - 80% done
+- [ ] Overall Completion - 85% done
 - [ ] Tests - 90% Complete
-- [x] Model class to create SQLAlchemy Models and Declarative Base
-- [x] SQLAlchemy model export to dictionary through `model.dict(exclude={'x', 'y', 'z'})`
-- [x] Support multiple database configurations in Models and in Query
-- [x] Session to manage Model metadata
-- [x] Service to manage Engine and Session creation and Migration initialization for async and sync Engines and Sessions
-- [x] Alembic env.py with async first `run_migrations_online` action
-- [x] Expose all alembic commands to Ellar CLI 
-- [x] Module to config and setup SQLAlchemy dependencies and migration
-- [ ] SQLAlchemy Pagination for both templating and API routes
-- [x] File and Image SQLAlchemy Columns integrated with ellar storage
+- [x] Model class that transforms to SQLAlchemy Models or DeclarativeBase based on configuration
+- [x] Pydantic-like way to exporting model to dictionary object eg:`model.dict(exclude={'x', 'y', 'z'})`
+- [x] Support multiple database useful in models and queries
+- [x] Session management during request scope and outside request
+- [x] Service to manage SQLAlchemy Engine and Session creation, and Migration for async and sync Engines and Sessions
+- [x] Async first approach to database migration using Alembic
+- [x] Expose all Alembic commands to Ellar CLI 
+- [x] Module to config and setup SQLAlchemy dependencies and migration path
+- [x] SQLAlchemy Pagination for both Templating and API routes
+- [x] File and Image SQLAlchemy Columns integration with ellar storage
 - [ ] SQLAlchemy Django Like Query
 - [ ] Documentation
 

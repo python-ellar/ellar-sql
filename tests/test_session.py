@@ -23,7 +23,7 @@ async def test_custom_scope(ignore_base, app_setup, anyio_backend):
         count += 1
         return count
 
-    app = app_setup(session_options={"scopefunc": scope})
+    app = app_setup(sql_module={"session_options": {"scopefunc": scope}})
 
     async with app.application_context():
         first = app.injector.get(model.Session)
@@ -37,7 +37,7 @@ def test_session_class(app_setup, ignore_base):
     class CustomSession(model.Session):
         pass
 
-    app = app_setup(session_options={"class_": CustomSession})
+    app = app_setup(sql_module={"session_options": {"class_": CustomSession}})
     session = app.injector.get(model.Session)
 
     assert isinstance(session, CustomSession)
@@ -56,7 +56,9 @@ def test_session_uses_bind_key(app_setup, base_super_class, ignore_base):
         __database__ = "a"
         id: model.Mapped[int] = model.mapped_column(model.Integer, primary_key=True)
 
-    app = app_setup(databases={"a": "sqlite://", "default": "sqlite://"})
+    app = app_setup(
+        sql_module={"databases": {"a": "sqlite://", "default": "sqlite://"}}
+    )
     session = app.injector.get(model.Session)
     db_service = app.injector.get(EllarSQLAlchemyService)
 
@@ -80,7 +82,9 @@ def test_session_uses_bind_key_map_as_dataclass(
         __database__ = "a"
         id = model.Column(model.Integer, primary_key=True)
 
-    app = app_setup(databases={"a": "sqlite://", "default": "sqlite://"})
+    app = app_setup(
+        sql_module={"databases": {"a": "sqlite://", "default": "sqlite://"}}
+    )
     session = app.injector.get(model.Session)
     db_service = app.injector.get(EllarSQLAlchemyService)
 
@@ -111,7 +115,9 @@ def test_get_bind_inheritance(base_super_class_as_dataclass, app_setup, ignore_b
         org: model.Mapped[str] = model.mapped_column(model.String, nullable=False)
         __mapper_args__ = {"polymorphic_identity": "admin"}
 
-    app = app_setup(databases={"a": "sqlite://", "default": "sqlite://"})
+    app = app_setup(
+        sql_module={"databases": {"a": "sqlite://", "default": "sqlite://"}}
+    )
     db_service = app.injector.get(EllarSQLAlchemyService)
     db_service.create_all()
 
@@ -138,7 +144,9 @@ def test_get_bind_inheritance_case_2(app_setup, base_super_class, ignore_base):
         org = model.Column(model.String, nullable=False)
         __mapper_args__ = {"polymorphic_identity": "admin"}
 
-    app = app_setup(databases={"a": "sqlite://", "default": "sqlite://"})
+    app = app_setup(
+        sql_module={"databases": {"a": "sqlite://", "default": "sqlite://"}}
+    )
     db_service = app.injector.get(EllarSQLAlchemyService)
     db_service.create_all()
 
@@ -176,7 +184,9 @@ def test_session_multiple_dbs_case_1(
             model.String(50), nullable=False, init=False
         )
 
-    app = app_setup(databases={"db1": "sqlite:///", "default": "sqlite://"})
+    app = app_setup(
+        sql_module={"databases": {"db1": "sqlite:///", "default": "sqlite://"}}
+    )
     db_service = app.injector.get(EllarSQLAlchemyService)
     db_service.create_all()
 
@@ -212,7 +222,9 @@ def test_session_multiple_dbs(app_setup, ignore_base, base_super_class):
         id = model.Column(model.Integer, primary_key=True)
         name = model.Column(model.String(50), nullable=False)
 
-    app = app_setup(databases={"db1": "sqlite:///", "default": "sqlite://"})
+    app = app_setup(
+        sql_module={"databases": {"db1": "sqlite:///", "default": "sqlite://"}}
+    )
     db_service = app.injector.get(EllarSQLAlchemyService)
     db_service.create_all()
 

@@ -132,3 +132,33 @@ def test_other_alembic_commands():
     result = run_command("default.py db downgrade")
     assert result.returncode == 1
     assert b"Relative revision -1 didn't produce 1 migrations" in result.stderr
+
+
+@clean_directory("default_async")
+def test_migrate_upgrade_async():
+    result = run_command("default_async.py db init")
+    assert result.returncode == 0
+    assert (
+        b"tests/dumbs/default_async/migrations/alembic.ini' before proceeding."
+        in result.stdout
+    )
+
+    result = run_command("default_async.py db check")
+    assert result.returncode == 1
+
+    result = run_command("default_async.py db migrate")
+    assert result.returncode == 0
+
+    result = run_command("default_async.py db check")
+    assert result.returncode == 1
+
+    result = run_command("default_async.py db upgrade")
+    assert result.returncode == 0
+
+    result = run_command("default_async.py db check")
+    assert result.returncode == 0
+    assert result.stdout == b"No new upgrade operations detected.\n"
+
+    result = run_command("default_async.py add-user")
+    assert result.returncode == 0
+    assert result.stdout == b"<User name=default App Ellar id=1>\n"
