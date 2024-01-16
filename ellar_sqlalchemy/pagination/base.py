@@ -126,12 +126,12 @@ class PaginatorBase:
 
     @property
     def has_prev(self) -> bool:
-        """``True`` if this is not the first page."""
+        """`True` if this is not the first page."""
         return self.page > 1
 
     @property
     def prev_num(self) -> t.Optional[int]:
-        """The previous page number, or ``None`` if this is the first page."""
+        """The previous page number, or `None` if this is the first page."""
         if not self.has_prev:
             return None
 
@@ -140,9 +140,8 @@ class PaginatorBase:
     def prev(self, *, error_out: bool = False) -> "PaginatorBase":
         """Query the pagination object for the previous page.
 
-        :param error_out: Abort with a ``404 Not Found`` error if no items are returned
-            and ``page`` is not 1, or if ``page`` or ``per_page`` is less than 1, or if
-            either are not ints.
+        :param error_out: Raise `404 Not Found` error if no items are returned
+            and `page` is not 1, or if `page` or `per_page` is less than 1.
         """
         init_kwargs = self._get_init_kwargs()
         init_kwargs.update(
@@ -157,19 +156,24 @@ class PaginatorBase:
 
     @property
     def has_next(self) -> bool:
-        """``True`` if this is not the last page."""
+        """`True` if this is not the last page."""
         return self.page < self.pages
 
     @property
     def next_num(self) -> t.Optional[int]:
-        """The next page number, or ``None`` if this is the last page."""
+        """The next page number, or `None` if this is the last page."""
         if not self.has_next:
             return None
 
         return self.page + 1
 
     def next(self, *, error_out: bool = False) -> "PaginatorBase":
-        """ """
+        """
+        Query the Pagination object for the next page.
+
+        :param error_out: Raise `404 Not Found` error if no items are returned
+            and `page` is not 1, or if `page` or `per_page` is less than 1.
+        """
         init_kwargs = self._get_init_kwargs()
         init_kwargs.update(
             page=self.page + 1,
@@ -190,15 +194,15 @@ class PaginatorBase:
         right_current: int = 4,
         right_edge: int = 2,
     ) -> t.Iterator[t.Optional[int]]:
-        """Yield page numbers for a pagination widget. Skipped pages between the edges
-        and middle are represented by a ``None``.
+        """
+        Yield page numbers for a pagination widget.
+        A None represents skipped pages between the edges and middle.
 
         For example, if there are 20 pages and the current page is 7, the following
         values are yielded.
 
-        .. code-block:: python
-
-            1, 2, None, 5, 6, 7, 8, 9, 10, 11, None, 19, 20
+        For example:
+        1, 2, None, 5, 6, 7, 8, 9, 10, 11, None, 19, 20
 
         :param left_edge: How many pages to show from the first page.
         :param left_current: How many pages to show left of the current page.

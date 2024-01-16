@@ -24,11 +24,11 @@ def paginate(
     """
     =========ROUTE FUNCTION DECORATOR ==============
 
-    # :param ttl: the time to live
-    # :param key_prefix: cache key prefix
-    # :param version: will be used in constructing the key
-    # :param backend: Cache Backend to use. Default is `default`
-    # :param make_key_callback: Key dynamic construct.
+    :param pagination_class: Pagination Class of type PaginationBase
+    :param model: SQLAlchemy Model or SQLAlchemy Select Statement
+    :param template_context: If True adds `paginator` object to templating context data
+    :param item_schema: Pagination Object Schema for serializing object and creating response schema documentation
+    :param paginator_options: Other keyword args for initializing `pagination_class`
     :return: TCallable
     """
     paginator_options.update(model=model)
