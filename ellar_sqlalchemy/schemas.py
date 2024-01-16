@@ -4,6 +4,33 @@ from dataclasses import asdict, dataclass, field
 
 import ellar.common as ecm
 import sqlalchemy.orm as sa_orm
+from pydantic import BaseModel, BeforeValidator, HttpUrl, TypeAdapter
+from typing_extensions import Annotated
+
+T = t.TypeVar("T")
+
+Url = Annotated[
+    str, BeforeValidator(lambda value: str(TypeAdapter(HttpUrl).validate_python(value)))
+]
+
+
+class BasePaginatedResponseSchema(BaseModel):
+    count: int
+    next: t.Optional[Url]
+    previous: t.Optional[Url]
+    results: t.List[t.Any]
+
+
+class BasicPaginationSchema(BaseModel, t.Generic[T]):
+    count: int
+    items: t.List[T]
+
+
+class PageNumberPaginationSchema(BaseModel, t.Generic[T]):
+    count: int
+    next: t.Optional[Url]
+    previous: t.Optional[Url]
+    items: t.List[T]
 
 
 @dataclass

@@ -86,7 +86,8 @@ def db_service_async(tmp_path) -> EllarSQLAlchemyService:
 @pytest.fixture()
 def app_setup(tmp_path):
     def _setup(**kwargs):
-        kwargs.setdefault(
+        sql_module = kwargs.pop("sql_module", {})
+        sql_module.setdefault(
             "databases",
             {
                 "default": {
@@ -96,9 +97,12 @@ def app_setup(tmp_path):
                 }
             },
         )
-        kwargs.setdefault("migration_options", {"directory": "migrations"})
+        sql_module.setdefault("migration_options", {"directory": "migrations"})
         tm = Test.create_test_module(
-            modules=[EllarSQLAlchemyModule.setup(root_path=str(tmp_path), **kwargs)]
+            modules=[
+                EllarSQLAlchemyModule.setup(root_path=str(tmp_path), **sql_module)
+            ],
+            **kwargs,
         )
         return tm.create_application()
 
@@ -108,7 +112,8 @@ def app_setup(tmp_path):
 @pytest.fixture()
 def app_setup_async(tmp_path):
     def _setup(**kwargs):
-        kwargs.setdefault(
+        sql_module = kwargs.pop("sql_module", {})
+        sql_module.setdefault(
             "databases",
             {
                 "default": {
@@ -118,10 +123,29 @@ def app_setup_async(tmp_path):
                 }
             },
         )
-        kwargs.setdefault("migration_options", {"directory": "migrations"})
+        sql_module.setdefault("migration_options", {"directory": "migrations"})
         tm = Test.create_test_module(
-            modules=[EllarSQLAlchemyModule.setup(root_path=str(tmp_path), **kwargs)]
+            modules=[
+                EllarSQLAlchemyModule.setup(root_path=str(tmp_path), **sql_module)
+            ],
+            **kwargs,
         )
         return tm.create_application()
 
     return _setup
+
+
+@pytest.fixture()
+async def app_ctx(app_setup):
+    app = app_setup()
+
+    async with app.application_context():
+        yield app
+
+
+@pytest.fixture()
+async def app_ctx_async(app_setup_async):
+    app = app_setup_async()
+
+    async with app.application_context():
+        yield app
