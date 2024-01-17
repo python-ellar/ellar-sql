@@ -1,5 +1,5 @@
-from ellar_sqlalchemy import EllarSQLAlchemyService, model
-from ellar_sqlalchemy.schemas import ModelBaseConfig
+from ellar_sql import EllarSQLService, model
+from ellar_sql.schemas import ModelBaseConfig
 
 
 async def test_scope(anyio_backend, ignore_base, app_setup) -> None:
@@ -60,7 +60,7 @@ def test_session_uses_bind_key(app_setup, base_super_class, ignore_base):
         sql_module={"databases": {"a": "sqlite://", "default": "sqlite://"}}
     )
     session = app.injector.get(model.Session)
-    db_service = app.injector.get(EllarSQLAlchemyService)
+    db_service = app.injector.get(EllarSQLService)
 
     assert session.get_bind(mapper=User) is db_service.engine
     assert session.get_bind(mapper=Post) is db_service.engines["a"]
@@ -86,7 +86,7 @@ def test_session_uses_bind_key_map_as_dataclass(
         sql_module={"databases": {"a": "sqlite://", "default": "sqlite://"}}
     )
     session = app.injector.get(model.Session)
-    db_service = app.injector.get(EllarSQLAlchemyService)
+    db_service = app.injector.get(EllarSQLService)
 
     assert session.get_bind(mapper=User) is db_service.engine
     assert session.get_bind(mapper=Post) is db_service.engines["a"]
@@ -118,7 +118,7 @@ def test_get_bind_inheritance(base_super_class_as_dataclass, app_setup, ignore_b
     app = app_setup(
         sql_module={"databases": {"a": "sqlite://", "default": "sqlite://"}}
     )
-    db_service = app.injector.get(EllarSQLAlchemyService)
+    db_service = app.injector.get(EllarSQLService)
     db_service.create_all()
 
     session = db_service.session_factory()
@@ -147,7 +147,7 @@ def test_get_bind_inheritance_case_2(app_setup, base_super_class, ignore_base):
     app = app_setup(
         sql_module={"databases": {"a": "sqlite://", "default": "sqlite://"}}
     )
-    db_service = app.injector.get(EllarSQLAlchemyService)
+    db_service = app.injector.get(EllarSQLService)
     db_service.create_all()
 
     session = db_service.session_factory()
@@ -187,7 +187,7 @@ def test_session_multiple_dbs_case_1(
     app = app_setup(
         sql_module={"databases": {"db1": "sqlite:///", "default": "sqlite://"}}
     )
-    db_service = app.injector.get(EllarSQLAlchemyService)
+    db_service = app.injector.get(EllarSQLService)
     db_service.create_all()
 
     session = db_service.session_factory()
@@ -225,7 +225,7 @@ def test_session_multiple_dbs(app_setup, ignore_base, base_super_class):
     app = app_setup(
         sql_module={"databases": {"db1": "sqlite:///", "default": "sqlite://"}}
     )
-    db_service = app.injector.get(EllarSQLAlchemyService)
+    db_service = app.injector.get(EllarSQLService)
     db_service.create_all()
 
     session = db_service.session_factory()

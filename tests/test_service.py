@@ -2,14 +2,14 @@ import pytest
 import sqlalchemy.exc as sa_exc
 from ellar.common.exceptions import ImproperConfiguration
 
-from ellar_sqlalchemy import model
-from ellar_sqlalchemy.constant import DATABASE_BIND_KEY, DEFAULT_KEY
-from ellar_sqlalchemy.model.database_binds import (
+from ellar_sql import model
+from ellar_sql.constant import DATABASE_BIND_KEY, DEFAULT_KEY
+from ellar_sql.model.database_binds import (
     __model_database_metadata__,
     get_database_bind,
 )
-from ellar_sqlalchemy.schemas import ModelBaseConfig
-from ellar_sqlalchemy.services import EllarSQLAlchemyService
+from ellar_sql.schemas import ModelBaseConfig
+from ellar_sql.services import EllarSQLService
 
 
 def test_service_default_setup_create_all(db_service, ignore_base):
@@ -65,7 +65,7 @@ def test_custom_metadata_2x(ignore_base):
 
 
 def test_metadata_per_bind(tmp_path, ignore_base):
-    EllarSQLAlchemyService(
+    EllarSQLService(
         databases={
             "a": "sqlite:///app2.db",
             "default": "sqlite:///app.db",
@@ -78,7 +78,7 @@ def test_metadata_per_bind(tmp_path, ignore_base):
 
 def test_setup_fails_when_default_database_is_not_configured(tmp_path, ignore_base):
     with pytest.raises(ImproperConfiguration):
-        EllarSQLAlchemyService(
+        EllarSQLService(
             databases={
                 "a": "sqlite:///app2.db",
             },
@@ -86,7 +86,7 @@ def test_setup_fails_when_default_database_is_not_configured(tmp_path, ignore_ba
         )
 
     with pytest.raises(ImproperConfiguration):
-        EllarSQLAlchemyService(
+        EllarSQLService(
             databases={
                 "a",
                 "sqlite:///app2.db",
@@ -102,7 +102,7 @@ def test_copy_naming_convention(tmp_path, ignore_base):
         )
         metadata = model.MetaData(naming_convention={"pk": "spk_%(table_name)s"})
 
-    EllarSQLAlchemyService(
+    EllarSQLService(
         databases={
             "a": "sqlite:///app2.db",
             "default": "sqlite:///app.db",
@@ -120,7 +120,7 @@ def test_copy_naming_convention(tmp_path, ignore_base):
 
 
 def test_create_drop_all(tmp_path, ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={
             "a": "sqlite:///app2.db",
             "default": "sqlite:///app.db",
@@ -157,7 +157,7 @@ def test_create_drop_all(tmp_path, ignore_base):
 
 @pytest.mark.parametrize("database_key", [["a"], ["a", "default"]])
 def test_create_key_spec(database_key, tmp_path, ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={
             "a": "sqlite:///app2.db",
             "default": "sqlite:///app.db",
@@ -184,7 +184,7 @@ def test_create_key_spec(database_key, tmp_path, ignore_base):
 
 
 def test_reflect(tmp_path, ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={
             "post": "sqlite:///post.db",
             "default": "sqlite:///user.db",
@@ -199,7 +199,7 @@ def test_reflect(tmp_path, ignore_base):
     del db_service
     __model_database_metadata__.clear()
 
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={
             "post": "sqlite:///post.db",
             "default": "sqlite:///user.db",
@@ -217,7 +217,7 @@ def test_reflect(tmp_path, ignore_base):
 
 @pytest.mark.asyncio
 async def test_service_create_drop_all_async(tmp_path, ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={
             "a": "sqlite+aiosqlite:///app2.db",
             "default": "sqlite+aiosqlite:///app.db",
@@ -257,7 +257,7 @@ async def test_service_create_drop_all_async(tmp_path, ignore_base):
 
 @pytest.mark.asyncio
 async def test_service_reflect_async(tmp_path, ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={
             "post": "sqlite+aiosqlite:///post.db",
             "default": "sqlite+aiosqlite:///user.db",
@@ -272,7 +272,7 @@ async def test_service_reflect_async(tmp_path, ignore_base):
     del db_service
     __model_database_metadata__.clear()
 
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={
             "post": "sqlite+aiosqlite:///post.db",
             "default": "sqlite+aiosqlite:///user.db",

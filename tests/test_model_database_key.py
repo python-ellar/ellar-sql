@@ -1,5 +1,5 @@
-from ellar_sqlalchemy import model
-from ellar_sqlalchemy.model.database_binds import get_database_bind
+from ellar_sql import model
+from ellar_sql.model.database_binds import get_database_bind
 
 
 def test_bind_key_default(ignore_base):

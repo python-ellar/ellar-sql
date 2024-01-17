@@ -4,7 +4,7 @@ import ellar.common as ecm
 import pytest
 from ellar.testing import TestClient
 
-from ellar_sqlalchemy import (
+from ellar_sql import (
     LimitOffsetPagination,
     PageNumberPagination,
     model,

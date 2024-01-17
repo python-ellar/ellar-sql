@@ -1,4 +1,4 @@
-from ellar_sqlalchemy import model
+from ellar_sql import model
 
 
 def test_ipaddress_column_type(db_service, ignore_base):

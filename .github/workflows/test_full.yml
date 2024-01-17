@@ -38,6 +38,6 @@ jobs:
       - name: Install Dependencies
         run: flit install --symlink
       - name: Linting check
-        run: ruff check ellar_sqlalchemy tests
+        run: ruff check ellar_sql tests
       - name: mypy
-        run: mypy ellar_sqlalchemy
+        run: mypy ellar_sql

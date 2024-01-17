@@ -19,20 +19,26 @@ install-full: ## Install dependencies
 	pre-commit install -f
 
 lint:fmt ## Run code linters
-	ruff check ellar_sqlalchemy tests
-	mypy ellar_sqlalchemy
+	ruff check ellar_sql tests
+	mypy ellar_sql
 
 fmt format:clean ## Run code formatters
-	ruff format ellar_sqlalchemy tests
-	ruff check --fix ellar_sqlalchemy tests
+	ruff format ellar_sql tests
+	ruff check --fix ellar_sql tests
 
 test: ## Run tests
 	pytest tests
 
 test-cov: ## Run tests with coverage
-	pytest --cov=ellar_sqlalchemy --cov-report term-missing tests
+	pytest --cov=ellar_sql --cov-report term-missing tests
 
 pre-commit-lint: ## Runs Requires commands during pre-commit
 	make clean
 	make fmt
 	make lint
+
+doc-deploy:clean ## Run Deploy Documentation
+	mkdocs gh-deploy --force --ignore-version
+
+doc-serve: ## Launch doc local server
+	mkdocs serve

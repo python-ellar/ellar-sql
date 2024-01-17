@@ -4,11 +4,11 @@ import unittest.mock
 import pytest
 from ellar.common.exceptions import ImproperConfiguration
 
-from ellar_sqlalchemy import EllarSQLAlchemyService, model
+from ellar_sql import EllarSQLService, model
 
 
 def test_engine_per_bind(tmp_path, ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={"default": "sqlite://", "a": "sqlite://"},
         root_path=str(tmp_path),
     )
@@ -16,7 +16,7 @@ def test_engine_per_bind(tmp_path, ignore_base):
 
 
 def test_config_engine_options(ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={"default": "sqlite://", "a": "sqlite://"},
         common_engine_options={"echo": True},
     )
@@ -25,7 +25,7 @@ def test_config_engine_options(ignore_base):
 
 
 def test_init_engine_options(ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={"default": "sqlite://", "a": {"url": "sqlite://", "echo": True}},
         common_engine_options={"echo": False},
     )
@@ -34,7 +34,7 @@ def test_init_engine_options(ignore_base):
 
 
 def test_config_echo(ignore_base):
-    db_service = EllarSQLAlchemyService(databases={"default": "sqlite://"}, echo=True)
+    db_service = EllarSQLService(databases={"default": "sqlite://"}, echo=True)
     assert db_service.engine.echo
     assert db_service.engine.pool.echo
 
@@ -49,7 +49,7 @@ def test_config_echo(ignore_base):
     ],
 )
 def test_url_type(value, ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={"default": "sqlite://", "a": value}, echo=True
     )
     assert str(db_service.engines["a"].url) == "sqlite://"
@@ -57,7 +57,7 @@ def test_url_type(value, ignore_base):
 
 def test_no_default_database_error(ignore_base):
     with pytest.raises(ImproperConfiguration) as info:
-        EllarSQLAlchemyService(
+        EllarSQLService(
             databases={},
         )
     e = "`default` database must be present in databases parameter: {}"
@@ -65,7 +65,7 @@ def test_no_default_database_error(ignore_base):
 
 
 def test_sqlite_relative_path(ignore_base, tmp_path):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={"default": "sqlite:///test.db"}, root_path=str(tmp_path)
     )
     db_service.create_all()
@@ -76,7 +76,7 @@ def test_sqlite_relative_path(ignore_base, tmp_path):
 
 
 def test_sqlite_driver_level_uri(tmp_path, ignore_base):
-    db_service = EllarSQLAlchemyService(
+    db_service = EllarSQLService(
         databases={"default": "sqlite:///file:test.db?uri=true"},
         root_path=str(tmp_path),
     )
@@ -87,21 +87,19 @@ def test_sqlite_driver_level_uri(tmp_path, ignore_base):
     assert os.path.exists(db_path[5:])
 
 
-@unittest.mock.patch.object(EllarSQLAlchemyService, "_make_engine", autospec=True)
+@unittest.mock.patch.object(EllarSQLService, "_make_engine", autospec=True)
 def test_sqlite_memory_defaults(
     make_engine: unittest.mock.Mock, tmp_path, ignore_base
 ) -> None:
-    EllarSQLAlchemyService(databases={"default": "sqlite://"}, root_path=str(tmp_path))
+    EllarSQLService(databases={"default": "sqlite://"}, root_path=str(tmp_path))
     options = make_engine.call_args[0][1]
     assert options["poolclass"] is model.pool.StaticPool
     assert options["connect_args"]["check_same_thread"] is False
 
 
-@unittest.mock.patch.object(EllarSQLAlchemyService, "_make_engine", autospec=True)
+@unittest.mock.patch.object(EllarSQLService, "_make_engine", autospec=True)
 def test_mysql_defaults(make_engine: unittest.mock.Mock, tmp_path, ignore_base) -> None:
-    EllarSQLAlchemyService(
-        databases={"default": "mysql:///test"}, root_path=str(tmp_path)
-    )
+    EllarSQLService(databases={"default": "mysql:///test"}, root_path=str(tmp_path))
     options = make_engine.call_args[0][1]
     assert options["pool_recycle"] == 7200
     assert options["url"].query["charset"] == "utf8mb4"

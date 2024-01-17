@@ -1,8 +1,8 @@
 import pytest
 from ellar.common import NotFound
 
-from ellar_sqlalchemy import EllarSQLAlchemyService
-from ellar_sqlalchemy.pagination import Paginator
+from ellar_sql import EllarSQLService
+from ellar_sql.pagination import Paginator
 
 from .seed import create_model, seed_100_users
 
@@ -70,7 +70,7 @@ async def test_no_count(ignore_base, app_ctx, anyio_backend):
 
 async def test_no_items_404(ignore_base, app_ctx, anyio_backend):
     user_model = create_model()
-    db_service = app_ctx.injector.get(EllarSQLAlchemyService)
+    db_service = app_ctx.injector.get(EllarSQLService)
 
     db_service.create_all()
 
@@ -86,7 +86,7 @@ async def test_no_items_404(ignore_base, app_ctx, anyio_backend):
 
 async def test_error_out(ignore_base, app_ctx, anyio_backend):
     user_model = create_model()
-    db_service = app_ctx.injector.get(EllarSQLAlchemyService)
+    db_service = app_ctx.injector.get(EllarSQLService)
 
     db_service.create_all()
     for page, per_page in [(-2, 5), (1, -5)]:

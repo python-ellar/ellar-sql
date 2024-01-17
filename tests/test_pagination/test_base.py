@@ -2,7 +2,7 @@ import typing as t
 
 import pytest
 
-from ellar_sqlalchemy.pagination import PaginatorBase
+from ellar_sql.pagination import PaginatorBase
 
 
 class RangePagination(PaginatorBase):

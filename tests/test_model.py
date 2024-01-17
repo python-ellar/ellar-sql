@@ -2,9 +2,9 @@ from datetime import datetime
 
 import pytest
 
-from ellar_sqlalchemy import model
-from ellar_sqlalchemy.model.mixins import get_registered_models
-from ellar_sqlalchemy.schemas import ModelBaseConfig
+from ellar_sql import model
+from ellar_sql.model.mixins import get_registered_models
+from ellar_sql.schemas import ModelBaseConfig
 
 from .model_samples import Base
 
