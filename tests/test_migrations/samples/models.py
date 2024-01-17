@@ -1,6 +1,6 @@
 import os
 
-from ellar_sqlalchemy import model
+from ellar_sql import model
 
 
 class Base(model.Model):

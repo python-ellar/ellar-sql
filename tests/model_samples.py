@@ -1,5 +1,5 @@
-from ellar_sqlalchemy import model
-from ellar_sqlalchemy.schemas import ModelBaseConfig
+from ellar_sql import model
+from ellar_sql.schemas import ModelBaseConfig
 
 
 class Base(model.Model):

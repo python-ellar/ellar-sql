@@ -3,7 +3,7 @@ import inspect
 import pytest
 import sqlalchemy.exc as sa_exc
 
-from ellar_sqlalchemy import model
+from ellar_sql import model
 
 
 @pytest.mark.parametrize(
@@ -92,7 +92,7 @@ def test_mixin_attr(ignore_base):
 
     class Mixin:
         @model.declared_attr  # type: ignore[arg-type]
-        def __tablename__(cls) -> str:  # noqa: B902
+        def __tablename__(cls) -> str:
             return cls.__name__.upper()  # type: ignore[attr-defined,no-any-return]
 
     class Bird(Mixin, model.Model):
@@ -135,7 +135,7 @@ def test_complex_inheritance(ignore_base):
 
     class IdMixin:
         @model.declared_attr
-        def id(cls):  # type: ignore[no-untyped-def]  # noqa: B902
+        def id(cls):  # type: ignore[no-untyped-def]
             return model.Column(
                 model.Integer, model.ForeignKey(Duck.id), primary_key=True
             )

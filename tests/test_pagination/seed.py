@@ -3,7 +3,7 @@ import typing as t
 from ellar.app import App
 from ellar.threading import execute_coroutine_with_sync_worker
 
-from ellar_sqlalchemy import EllarSQLAlchemyService, model
+from ellar_sql import EllarSQLService, model
 
 
 def create_model():
@@ -16,7 +16,7 @@ def create_model():
 
 def seed_100_users(app: App):
     user_model = create_model()
-    db_service = app.injector.get(EllarSQLAlchemyService)
+    db_service = app.injector.get(EllarSQLService)
 
     session = db_service.session_factory()
 

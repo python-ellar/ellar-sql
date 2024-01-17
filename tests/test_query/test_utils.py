@@ -5,8 +5,8 @@ from ellar.app import App
 from ellar.common import NotFound
 from ellar.threading import execute_coroutine_with_sync_worker
 
-from ellar_sqlalchemy import (
-    EllarSQLAlchemyService,
+from ellar_sql import (
+    EllarSQLService,
     first_or_404,
     first_or_404_async,
     get_or_404,
@@ -27,7 +27,7 @@ def _create_model():
 
 def _seed_model(app: App):
     user_model = _create_model()
-    db_service = app.injector.get(EllarSQLAlchemyService)
+    db_service = app.injector.get(EllarSQLService)
 
     session = db_service.session_factory()
 

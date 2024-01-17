@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, func, MetaData
 from sqlalchemy.orm import Mapped, mapped_column
 
-from ellar_sqlalchemy.model import Model
+from ellar_sql.model import Model
 
 convention = {
     "ix": "ix_%(column_0_label)s",

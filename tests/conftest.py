@@ -3,8 +3,8 @@ import typing as t
 import pytest
 from ellar.testing import Test
 
-from ellar_sqlalchemy import EllarSQLAlchemyModule, EllarSQLAlchemyService, model
-from ellar_sqlalchemy.model.database_binds import __model_database_metadata__
+from ellar_sql import EllarSQLModule, EllarSQLService, model
+from ellar_sql.model.database_binds import __model_database_metadata__
 
 super_classes_as_dataclass = [
     (
@@ -60,8 +60,8 @@ def ignore_base():
 
 
 @pytest.fixture()
-def db_service(tmp_path) -> EllarSQLAlchemyService:
-    return EllarSQLAlchemyService(
+def db_service(tmp_path) -> EllarSQLService:
+    return EllarSQLService(
         databases={
             "default": {"url": "sqlite:///:memory:", "echo": True, "future": True}
         },
@@ -70,8 +70,8 @@ def db_service(tmp_path) -> EllarSQLAlchemyService:
 
 
 @pytest.fixture()
-def db_service_async(tmp_path) -> EllarSQLAlchemyService:
-    return EllarSQLAlchemyService(
+def db_service_async(tmp_path) -> EllarSQLService:
+    return EllarSQLService(
         databases={
             "default": {
                 "url": "sqlite+aiosqlite:///:memory:",
@@ -99,9 +99,7 @@ def app_setup(tmp_path):
         )
         sql_module.setdefault("migration_options", {"directory": "migrations"})
         tm = Test.create_test_module(
-            modules=[
-                EllarSQLAlchemyModule.setup(root_path=str(tmp_path), **sql_module)
-            ],
+            modules=[EllarSQLModule.setup(root_path=str(tmp_path), **sql_module)],
             **kwargs,
         )
         return tm.create_application()
@@ -125,9 +123,7 @@ def app_setup_async(tmp_path):
         )
         sql_module.setdefault("migration_options", {"directory": "migrations"})
         tm = Test.create_test_module(
-            modules=[
-                EllarSQLAlchemyModule.setup(root_path=str(tmp_path), **sql_module)
-            ],
+            modules=[EllarSQLModule.setup(root_path=str(tmp_path), **sql_module)],
             **kwargs,
         )
         return tm.create_application()

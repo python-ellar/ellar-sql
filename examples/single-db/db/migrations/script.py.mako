@@ -20,9 +20,9 @@ depends_on = ${repr(depends_on)}
 
 <%!
     from ellar.app import current_injector
-    from ellar_sqlalchemy.services import EllarSQLAlchemyService
+    from ellar_sql.services import EllarSQLService
 
-    db_service = current_injector.get(EllarSQLAlchemyService)
+    db_service = current_injector.get(EllarSQLService)
     db_names = list(db_service.engines.keys())
 %>
 

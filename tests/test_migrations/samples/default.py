@@ -5,7 +5,7 @@ from ellar.common.utils.importer import get_main_directory_by_stack
 from ellar_cli.main import create_ellar_cli
 from models import User
 
-from ellar_sqlalchemy import EllarSQLAlchemyModule, model
+from ellar_sql import EllarSQLModule, model
 
 
 def bootstrap():
@@ -14,7 +14,7 @@ def bootstrap():
     )
     application = AppFactory.create_app(
         modules=[
-            EllarSQLAlchemyModule.setup(
+            EllarSQLModule.setup(
                 databases="sqlite:///app.db",
                 migration_options={"context_configure": {"compare_types": False}},
                 root_path=str(path),

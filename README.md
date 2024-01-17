@@ -52,7 +52,7 @@ Then, in `models/base.py` define your model base as shown below:
 from datetime import datetime
 from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
-from ellar_sqlalchemy.model import Model
+from ellar_sql.model import Model
 
 
 class Base(Model):
@@ -89,7 +89,7 @@ from ellar.app import App
 from ellar.common import Module, IApplicationStartup
 from ellar.core import ModuleBase
 from ellar.di import Container
-from ellar_sqlalchemy import EllarSQLAlchemyModule, EllarSQLAlchemyService
+from ellar_sql import EllarSQLAlchemyModule, EllarSQLService
 
 from .controllers import DbController
 
@@ -116,7 +116,7 @@ class DbModule(ModuleBase, IApplicationStartup):
     """
 
     async def on_startup(self, app: App) -> None:
-        db_service = app.injector.get(EllarSQLAlchemyService)
+        db_service = app.injector.get(EllarSQLService)
         db_service.create_all()
 
     def register_providers(self, container: Container) -> None:

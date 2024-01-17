@@ -3,18 +3,18 @@ requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.module]
-name = "ellar_sqlalchemy"
+name = "ellar_sql"
 
 
 [project]
-name = "ellar-sqlalchemy"
+name = "ellar-sql"
 authors = [
    {name = "Ezeudoh Tochukwu", email = "tochukwu.ezeudoh@gmail.com"},
 ]
 dynamic = ["version", "description"]
 requires-python = ">=3.8"
 readme = "README.md"
-home-page = "https://github.com/python-ellar/ellar-sqlalchemy"
+home-page = "https://github.com/python-ellar/ellar-sql"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
@@ -42,12 +42,22 @@ dependencies = [
 dev = [
     "pre-commit"
 ]
+doc = [
+    "mkdocs >=1.1.2,<2.0.0",
+    "mkdocs-material >=7.1.9,<10.0.0",
+    "mdx-include >=1.4.1,<2.0.0",
+    "mkdocs-markdownextradata-plugin >=0.1.7,<0.3.0",
+    "markdown-include",
+    "mkdocstrings",
+    "mkdocs-minify-plugin",
+    "mkdocs-git-revision-date-localized-plugin"
+]
 
 [project.urls]
-Documentation = "https://github.com/python-ellar/ellar-sqlalchemy"
-Source = "https://github.com/python-ellar/ellar-sqlalchemy"
-Homepage = "https://python-ellar.github.io/ellar-sqlalchemy/"
-"Bug Tracker" = "https://github.com/python-ellar/ellar-sqlalchemy/issues"
+Documentation = "https://github.com/python-ellar/ellar-sql"
+Source = "https://github.com/python-ellar/ellar-sql"
+Homepage = "https://python-ellar.github.io/ellar-sql/"
+"Bug Tracker" = "https://github.com/python-ellar/ellar-sql/issues"
 
 [project.optional-dependencies]
 test = [
@@ -80,6 +90,7 @@ ignore = [
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401", "F403"]
+"ellar_sql/model/__init__.py" = ["F811"]
 
 [tool.ruff.isort]
 known-third-party = ["ellar"]
@@ -92,14 +103,14 @@ strict_optional = true
 disable_error_code = ["name-defined", 'union-attr']
 disallow_subclassing_any = false
 [[tool.mypy.overrides]]
-module = "ellar_sqlalchemy.cli.commands"
+module = "ellar_sql.cli.commands"
 ignore_errors = true
 [[tool.mypy.overrides]]
-module = "ellar_sqlalchemy.migrations.*"
+module = "ellar_sql.migrations.*"
 disable_error_code = ["arg-type", 'union-attr']
 [[tool.mypy.overrides]]
-module = "ellar_sqlalchemy.pagination.*"
+module = "ellar_sql.pagination.*"
 disable_error_code = ["arg-type", 'union-attr', 'valid-type']
 [[tool.mypy.overrides]]
-module = "ellar_sqlalchemy.model.base"
+module = "ellar_sql.model.base"
 disable_error_code = ["attr-defined", 'union-attr']

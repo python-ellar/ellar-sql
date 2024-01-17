@@ -9,8 +9,8 @@ from ellar.common.datastructures import ContentFile, UploadFile
 from ellar.core.files import storages
 from starlette.datastructures import Headers
 
-from ellar_sqlalchemy import model
-from ellar_sqlalchemy.model.utils import MB
+from ellar_sql import model
+from ellar_sql.model.utils import MB
 
 
 def serialize_file_data(file):
@@ -83,7 +83,7 @@ def test_file_column_invalid_file_extension(db_service, ignore_base, tmp_path):
 
 
 @patch(
-    "ellar_sqlalchemy.model.typeDecorator.file.base.magic_mime_from_buffer",
+    "ellar_sql.model.typeDecorator.file.base.magic_mime_from_buffer",
     return_value=None,
 )
 def test_file_column_invalid_file_extension_case_2(
@@ -122,7 +122,7 @@ def test_file_column_invalid_file_extension_case_2(
     )
 
 
-@patch("ellar_sqlalchemy.model.typeDecorator.file.base.get_length", return_value=MB * 7)
+@patch("ellar_sql.model.typeDecorator.file.base.get_length", return_value=MB * 7)
 def test_file_column_invalid_file_size_case_2(
     mock_buffer, db_service, ignore_base, tmp_path
 ):

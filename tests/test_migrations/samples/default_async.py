@@ -6,7 +6,7 @@ from ellar_cli.main import create_ellar_cli
 from models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ellar_sqlalchemy import EllarSQLAlchemyModule
+from ellar_sql import EllarSQLModule
 
 
 def bootstrap():
@@ -15,7 +15,7 @@ def bootstrap():
     )
     application = AppFactory.create_app(
         modules=[
-            EllarSQLAlchemyModule.setup(
+            EllarSQLModule.setup(
                 databases="sqlite+aiosqlite:///app.db",
                 migration_options={"context_configure": {"compare_types": False}},
                 root_path=str(path),

@@ -8,8 +8,8 @@ from ellar.common.datastructures import ContentFile, UploadFile
 from ellar.core.files import storages
 from starlette.datastructures import Headers
 
-from ellar_sqlalchemy import model
-from ellar_sqlalchemy.model.utils import get_length
+from ellar_sql import model
+from ellar_sql.model.utils import get_length
 
 fixtures_dir = Path(__file__).parent / "fixtures"
 

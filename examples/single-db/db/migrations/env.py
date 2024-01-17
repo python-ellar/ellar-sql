@@ -5,13 +5,13 @@ from logging.config import fileConfig
 from alembic import context
 from ellar.app import current_injector
 
-from ellar_sqlalchemy.migrations import (
+from ellar_sql.migrations import (
     MultipleDatabaseAlembicEnvMigration,
     SingleDatabaseAlembicEnvMigration,
 )
-from ellar_sqlalchemy.services import EllarSQLAlchemyService
+from ellar_sql.services import EllarSQLService
 
-db_service: EllarSQLAlchemyService = current_injector.get(EllarSQLAlchemyService)
+db_service: EllarSQLService = current_injector.get(EllarSQLService)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
