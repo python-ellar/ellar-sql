@@ -28,10 +28,7 @@ def _seed_model(app: App):
 
     session = db_service.session_factory()
 
-    if session.get_bind().dialect.is_async:
-        execute_coroutine_with_sync_worker(db_service.create_all_async())
-    else:
-        db_service.create_all()
+    db_service.create_all()
 
     session.add(user_model(name="First User"))
     res = session.commit()
