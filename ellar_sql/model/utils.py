@@ -1,6 +1,4 @@
 import re
-import typing as t
-from io import BytesIO
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
@@ -8,25 +6,6 @@ import sqlalchemy.orm as sa_orm
 from ellar_sql.constant import DATABASE_BIND_KEY, DEFAULT_KEY, NAMING_CONVERSION
 
 from .database_binds import get_metadata, has_metadata, update_database_metadata
-
-KB = 1024
-MB = 1024 * KB
-
-
-def copy_stream(source: t.IO, target: t.IO, *, chunk_size: int = 16 * KB) -> int:  # type:ignore[type-arg]
-    length = 0
-    while 1:
-        buf = source.read(chunk_size)
-        if not buf:
-            break
-        length += len(buf)
-        target.write(buf)
-    return length
-
-
-def get_length(source: t.IO) -> int:  # type:ignore[type-arg]
-    buffer = BytesIO()
-    return copy_stream(source, buffer)
 
 
 def make_metadata(database_key: str) -> sa.MetaData:
