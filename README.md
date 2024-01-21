@@ -9,36 +9,24 @@
 [![PyPI version](https://img.shields.io/pypi/pyversions/ellar-sql.svg)](https://pypi.python.org/pypi/ellar-sql)
 
 ## Project Status
-
-- [ ] Overall Completion - 85% done
-- [ ] Tests - 90% Complete
-- [x] Model class that transforms to SQLAlchemy Models or DeclarativeBase based on configuration
-- [x] Pydantic-like way to exporting model to dictionary object eg:`model.dict(exclude={'x', 'y', 'z'})`
-- [x] Support multiple database useful in models and queries
-- [x] Session management during request scope and outside request
-- [x] Service to manage SQLAlchemy Engine and Session creation, and Migration for async and sync Engines and Sessions
-- [x] Async first approach to database migration using Alembic
-- [x] Expose all Alembic commands to Ellar CLI 
-- [x] Module to config and setup SQLAlchemy dependencies and migration path
-- [x] SQLAlchemy Pagination for both Templating and API routes
-- [x] File and Image SQLAlchemy Columns integration with ellar storage
+- [x] Production Ready
 - [ ] SQLAlchemy Django Like Query
-- [ ] Documentation
 
 ## Introduction
-Ellar SQLAlchemy Module simplifies the integration of SQLAlchemy and Alembic migration tooling into your ellar application.
+EllarSQL Module adds support for `SQLAlchemy` and `Alembic` package to your Ellar application
 
 ## Installation
 ```shell
-$(venv) pip install ellar-sqlalchemy
+$(venv) pip install ellar-sql
 ```
 
 ## Features
-- Automatic table name
-- Session management during request and after request
-- Support both async/sync SQLAlchemy operations in Session, Engine, and Connection.
-- Multiple Database Support
-- Database migrations for both single and multiple databases either async/sync database engine
+
+- Migration
+- Single/Multiple Database
+- Pagination
+- Compatible with SQLAlchemy tools
+
 
 ## **Usage**
 In your ellar application, create a module called `db` or any name of your choice,
@@ -104,7 +92,7 @@ from .controllers import DbController
             }, 
             echo=True, 
             migration_options={
-                'directory': '__main__/migrations'
+                'directory': 'my_migrations_folder'
             },
             models=['db.models.users']
         )

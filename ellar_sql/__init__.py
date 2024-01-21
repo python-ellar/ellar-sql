@@ -1,4 +1,4 @@
-"""Ellar SQLAlchemy Module - Adds support for SQLAlchemy and Alembic package to your Ellar web Framework"""
+"""EllarSQL Module adds support for SQLAlchemy and Alembic package to your Ellar application"""
 
 __version__ = "0.0.1"
 

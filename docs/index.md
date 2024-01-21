@@ -26,13 +26,11 @@ we recommend referring to the comprehensive [SQLAlchemy documentation](https://d
 ## **Feature Highlights**
 EllarSQL comes packed with a set of awesome features designed:
 
-- **Migration Mastery**: Enjoy an async-first migration solution that seamlessly handles both single and multiple database setups and for both async and sync database engines configuration.
+- **Migration**: Enjoy an async-first migration solution that seamlessly handles both single and multiple database setups and for both async and sync database engines configuration.
 
-- **Database Diversity**: Dive into the world of multiple databases with ease. EllarSQL provides an intuitive setup for models with different databases, allowing you to manage your data across various sources effortlessly.
+- **Single/Multiple Database**: EllarSQL provides an intuitive setup for models with different databases, allowing you to manage your data across various sources effortlessly.
 
-- **Pagination Perfection**: EllarSQL introduces SQLAlchemy Paginator for API/Templated routes, along with support for other fantastic SQLAlchemy pagination tools.
-
-- **Extra Column Field**: EllarSQL spices things up with additional column types like **GUID**, **IPAddress**, **File**, and **Image** Fields.
+- **Pagination**: EllarSQL introduces SQLAlchemy Paginator for API/Templated routes, along with support for other fantastic SQLAlchemy pagination tools.
 
 - **Unlimited Compatibility**: EllarSQL plays nice with the entire SQLAlchemy ecosystem. Whether you're using third-party tools or exploring the vast SQLAlchemy landscape, EllarSQL seamlessly integrates with your preferred tooling.
 
