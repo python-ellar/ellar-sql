@@ -56,7 +56,7 @@ class BaseConfig(ConfigDefaultTypesMixin):
     # A dictionary mapping either integer status codes,
     # or exception class types onto callables which handle the exceptions.
     # Exception handler callables should be of the form
-    # `handler(context:IExecutionContext, exc: Exception) -> response` 
+    # `handler(context:IExecutionContext, exc: Exception) -> response`
     # and may be either standard functions, or async functions.
     EXCEPTION_HANDLERS: t.List[IExceptionHandler] = []
 
@@ -69,7 +69,7 @@ class BaseConfig(ConfigDefaultTypesMixin):
 class DevelopmentConfig(BaseConfig):
     DEBUG: bool = True
     # Configuration through Confog
-    SQLALCHEMY_CONFIG: t.Dict[str, t.Any] = {
+    ELLAR_SQL: t.Dict[str, t.Any] = {
         'databases': {
             'default': 'sqlite:///project.db',
             # 'db2': 'sqlite+aiosqlite:///project2.db',

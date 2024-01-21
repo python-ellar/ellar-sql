@@ -407,12 +407,19 @@ def check(ctx: click.Context, directory):
     help='Migration script directory (default is "migrations")',
 )
 @click.option(
+    "-m",
+    "--multiple",
+    default=False,
+    is_flag=True,
+    help='Use multiple migration template (default is "False")',
+)
+@click.option(
     "--package",
     is_flag=True,
     help="Write empty __init__.py files to the environment and " "version locations",
 )
 @click.pass_context
-def init(ctx: click.Context, directory, package):
+def init(ctx: click.Context, directory, multiple, package):
     """Creates a new migration repository."""
     handler = _get_handler_context(ctx)
-    handler.alembic_init(directory, package)
+    handler.alembic_init(directory, multiple, package)

@@ -5,7 +5,7 @@ import typing as t
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from ellar_sql.model.database_binds import get_database_bind
+from ellar_sql.model.database_binds import get_metadata
 from ellar_sql.types import RevisionArgs
 
 from .base import AlembicEnvMigrationBase
@@ -51,7 +51,7 @@ class SingleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         """
 
         key, engine = self.db_service.engines.popitem()
-        metadata = get_database_bind(key, certain=True)
+        metadata = get_metadata(key, certain=True)
 
         conf_args = self.get_user_context_configurations()
 
@@ -93,7 +93,7 @@ class SingleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         """
 
         key, engine = self.db_service.engines.popitem()
-        metadata = get_database_bind(key, certain=True)
+        metadata = get_metadata(key, certain=True)
 
         migration_action_partial = functools.partial(
             self._migration_action, metadata=metadata, context=context

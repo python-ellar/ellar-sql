@@ -8,12 +8,9 @@ from ellar.threading import execute_coroutine_with_sync_worker
 from ellar_sql import (
     EllarSQLService,
     first_or_404,
-    first_or_404_async,
     get_or_404,
-    get_or_404_async,
     model,
     one_or_404,
-    one_or_404_async,
 )
 
 
@@ -48,65 +45,67 @@ def _seed_model(app: App):
 async def test_get_or_404_works(ignore_base, app_ctx, anyio_backend):
     user_model = _seed_model(app_ctx)
 
-    user_instance = get_or_404(user_model, 1)
+    user_instance = await get_or_404(user_model, 1)
     assert user_instance.name == "First User"
 
     with pytest.raises(NotFound):
-        get_or_404(user_model, 2)
+        await get_or_404(user_model, 2)
 
 
 async def test_get_or_404_async_works(ignore_base, app_ctx_async, anyio_backend):
     if anyio_backend == "asyncio":
         user_model = _seed_model(app_ctx_async)
 
-        user_instance = await get_or_404_async(user_model, 1)
+        user_instance = await get_or_404(user_model, 1)
         assert user_instance.name == "First User"
 
         with pytest.raises(NotFound):
-            await get_or_404_async(user_model, 2)
+            await get_or_404(user_model, 2)
 
 
 async def test_first_or_404_works(ignore_base, app_ctx, anyio_backend):
     user_model = _seed_model(app_ctx)
 
-    user_instance = first_or_404(model.select(user_model).where(user_model.id == 1))
+    user_instance = await first_or_404(
+        model.select(user_model).where(user_model.id == 1)
+    )
     assert user_instance.name == "First User"
 
     with pytest.raises(NotFound):
-        first_or_404(model.select(user_model).where(user_model.id == 2))
+        await first_or_404(model.select(user_model).where(user_model.id == 2))
 
 
 async def test_first_or_404_async_works(ignore_base, app_ctx_async, anyio_backend):
     if anyio_backend == "asyncio":
         user_model = _seed_model(app_ctx_async)
 
-        user_instance = await first_or_404_async(
+        user_instance = await first_or_404(
             model.select(user_model).where(user_model.id == 1)
         )
         assert user_instance.name == "First User"
 
         with pytest.raises(NotFound):
-            await first_or_404_async(model.select(user_model).where(user_model.id == 2))
+            await first_or_404(model.select(user_model).where(user_model.id == 2))
 
 
 async def test_one_or_404_works(ignore_base, app_ctx, anyio_backend):
     user_model = _seed_model(app_ctx)
 
-    user_instance = one_or_404(model.select(user_model).where(user_model.id == 1))
+    user_instance = await one_or_404(model.select(user_model).where(user_model.id == 1))
     assert user_instance.name == "First User"
 
     with pytest.raises(NotFound):
-        one_or_404(model.select(user_model).where(user_model.id == 2))
+        await one_or_404(model.select(user_model).where(user_model.id == 2))
 
 
 async def test_one_or_404_async_works(ignore_base, app_ctx_async, anyio_backend):
     if anyio_backend == "asyncio":
         user_model = _seed_model(app_ctx_async)
 
-        user_instance = await one_or_404_async(
+        user_instance = await one_or_404(
             model.select(user_model).where(user_model.id == 1)
         )
         assert user_instance.name == "First User"
 
         with pytest.raises(NotFound):
-            await one_or_404_async(model.select(user_model).where(user_model.id == 2))
+            await one_or_404(model.select(user_model).where(user_model.id == 2))

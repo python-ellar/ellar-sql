@@ -8,11 +8,4 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String)
 
-
-
-assert getattr(User, '__dnd__', None) == 'Ellar'
-
 # assert session
-
-
-

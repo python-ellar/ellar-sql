@@ -35,6 +35,7 @@ class PageNumberPaginationSchema(BaseModel, t.Generic[T]):
 
 @dataclass
 class ModelBaseConfig:
+    # Will be used when creating SQLAlchemy Model as a base or standalone
     use_bases: t.Sequence[
         t.Union[
             t.Type[t.Union[sa_orm.DeclarativeBase, sa_orm.DeclarativeBaseNoMeta]],
@@ -42,8 +43,8 @@ class ModelBaseConfig:
             t.Any,
         ]
     ] = field(default_factory=lambda: [])
-
-    make_declarative_base: bool = False
+    # indicates whether a class should be created a base for other models to inherit
+    as_base: bool = False
     _use: t.Optional[t.Type[t.Any]] = None
 
     # def get_use_type(self) -> t.Type[t.Any]:

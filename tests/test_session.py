@@ -165,7 +165,7 @@ def test_session_multiple_dbs_case_1(
     bases, _ = base_super_class_as_dataclass
 
     class Base(model.Model):
-        __base_config__ = ModelBaseConfig(use_bases=bases, make_declarative_base=True)
+        __base_config__ = ModelBaseConfig(use_bases=bases, as_base=True)
 
     class User(Base):
         id: model.Mapped[int] = model.mapped_column(

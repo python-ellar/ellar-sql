@@ -12,6 +12,7 @@ from ellar.common.utils.importer import (
     module_import,
 )
 from ellar.events import app_context_teardown_events
+from ellar.threading import execute_coroutine_with_sync_worker
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_scoped_session,
@@ -24,7 +25,7 @@ from ellar_sql.constant import (
 from ellar_sql.model import (
     make_metadata,
 )
-from ellar_sql.model.database_binds import get_database_bind, get_database_binds
+from ellar_sql.model.database_binds import get_all_metadata, get_metadata
 from ellar_sql.schemas import MigrationOption
 from ellar_sql.session import ModelSession
 
@@ -155,12 +156,10 @@ class EllarSQLService:
 
         metadata_engines = self._get_metadata_and_engine(_databases)
 
-        if self.has_async_engine_driver and _databases == "__all__":
-            raise Exception(
-                "You are using asynchronous database configuration. Use `create_all_async` instead"
-            )
-
         for metadata_engine in metadata_engines:
+            if metadata_engine.is_async():
+                execute_coroutine_with_sync_worker(metadata_engine.create_all_async())
+                continue
             metadata_engine.create_all()
 
     def drop_all(self, *databases: str) -> None:
@@ -168,12 +167,10 @@ class EllarSQLService:
 
         metadata_engines = self._get_metadata_and_engine(_databases)
 
-        if self.has_async_engine_driver and _databases == "__all__":
-            raise Exception(
-                "You are using asynchronous database configuration. Use `drop_all_async` instead"
-            )
-
         for metadata_engine in metadata_engines:
+            if metadata_engine.is_async():
+                execute_coroutine_with_sync_worker(metadata_engine.drop_all_async())
+                continue
             metadata_engine.drop_all()
 
     def reflect(self, *databases: str) -> None:
@@ -181,45 +178,11 @@ class EllarSQLService:
 
         metadata_engines = self._get_metadata_and_engine(_databases)
 
-        if self.has_async_engine_driver and _databases == "__all__":
-            raise Exception(
-                "You are using asynchronous database configuration. Use `reflect_async` instead"
-            )
         for metadata_engine in metadata_engines:
+            if metadata_engine.is_async():
+                execute_coroutine_with_sync_worker(metadata_engine.reflect_async())
+                continue
             metadata_engine.reflect()
-
-    async def create_all_async(self, *databases: str) -> None:
-        _databases = self.__validate_databases_input(*databases)
-
-        metadata_engines = self._get_metadata_and_engine(_databases)
-
-        for metadata_engine in metadata_engines:
-            if not metadata_engine.is_async():
-                metadata_engine.create_all()
-                continue
-            await metadata_engine.create_all_async()
-
-    async def drop_all_async(self, *databases: str) -> None:
-        _databases = self.__validate_databases_input(*databases)
-
-        metadata_engines = self._get_metadata_and_engine(_databases)
-
-        for metadata_engine in metadata_engines:
-            if not metadata_engine.is_async():
-                metadata_engine.drop_all()
-                continue
-            await metadata_engine.drop_all_async()
-
-    async def reflect_async(self, *databases: str) -> None:
-        _databases = self.__validate_databases_input(*databases)
-
-        metadata_engines = self._get_metadata_and_engine(_databases)
-
-        for metadata_engine in metadata_engines:
-            if not metadata_engine.is_async():
-                metadata_engine.reflect()
-                continue
-            await metadata_engine.reflect_async()
 
     def get_scoped_session(
         self,
@@ -313,7 +276,7 @@ class EllarSQLService:
         engines = self._engines[self]
 
         if database == "__all__":
-            keys: t.List[str] = list(get_database_binds())
+            keys: t.List[str] = list(get_all_metadata())
         elif isinstance(database, str):
             keys = [database]
         else:
@@ -328,6 +291,6 @@ class EllarSQLService:
                 message = f"Bind key '{key}' is not in 'Database' config."
                 raise sa_exc.UnboundExecutionError(message) from None
 
-            metadata = get_database_bind(key, certain=True)
+            metadata = get_metadata(key, certain=True)
             result.append(MetaDataEngine(metadata=metadata, engine=engine))
         return result

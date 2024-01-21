@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
-from ellar_sql.model.database_binds import get_database_bind
+from ellar_sql.model.database_binds import get_metadata
 from ellar_sql.types import RevisionArgs
 
 from .base import AlembicEnvMigrationBase
@@ -102,7 +102,7 @@ class MultipleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
             logger.info("Migrating database %s" % key)
 
             url = str(engine.url).replace("%", "%%")
-            metadata = get_database_bind(key, certain=True)
+            metadata = get_metadata(key, certain=True)
 
             file_ = "%s.sql" % key
             logger.info("Writing output to %s" % file_)
@@ -168,7 +168,7 @@ class MultipleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         res = []
 
         for key, engine in self.db_service.engines.items():
-            metadata = get_database_bind(key, certain=True)
+            metadata = get_metadata(key, certain=True)
 
             if engine.dialect.is_async:
                 async_engine = AsyncEngine(engine)

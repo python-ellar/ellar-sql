@@ -17,7 +17,7 @@ from .view import PageNumberPagination, PaginationBase
 def paginate(
     pagination_class: t.Optional[t.Type[PaginationBase]] = None,
     model: t.Optional[t.Type[ModelBase]] = None,
-    template_context: bool = False,
+    as_template_context: bool = False,
     item_schema: t.Optional[t.Type[BaseModel]] = None,
     **paginator_options: t.Any,
 ) -> t.Callable:
@@ -26,7 +26,7 @@ def paginate(
 
     :param pagination_class: Pagination Class of type PaginationBase
     :param model: SQLAlchemy Model or SQLAlchemy Select Statement
-    :param template_context: If True adds `paginator` object to templating context data
+    :param as_template_context: If True adds `paginator` object to templating context data
     :param item_schema: Pagination Object Schema for serializing object and creating response schema documentation
     :param paginator_options: Other keyword args for initializing `pagination_class`
     :return: TCallable
@@ -42,7 +42,7 @@ def paginate(
         operation = operation_class(
             route_function=func,
             pagination_class=pagination_class or PageNumberPagination,
-            template_context=template_context,
+            as_template_context=as_template_context,
             item_schema=item_schema,
             paginator_options=paginator_options,
         )
@@ -58,12 +58,12 @@ class _PaginationOperation:
         route_function: t.Callable,
         pagination_class: t.Type[PaginationBase],
         paginator_options: t.Dict[str, t.Any],
-        template_context: bool = False,
+        as_template_context: bool = False,
         item_schema: t.Optional[t.Type[BaseModel]] = None,
     ) -> None:
         self._original_route_function = route_function
         self._pagination_view = pagination_class(**paginator_options)
-        _, _, view = self._get_route_function_wrapper(template_context, item_schema)
+        _, _, view = self._get_route_function_wrapper(as_template_context, item_schema)
         self.as_view = functools.wraps(route_function)(view)
 
     def _prepare_template_response(
@@ -96,7 +96,7 @@ class _PaginationOperation:
         return filter_query, extra_context
 
     def _get_route_function_wrapper(
-        self, template_context: bool, item_schema: t.Type[BaseModel]
+        self, as_template_context: bool, item_schema: t.Type[BaseModel]
     ) -> t.Tuple[ecm.params.ExtraEndpointArg, ecm.params.ExtraEndpointArg, t.Callable]:
         unique_id = str(uuid.uuid4())
         # use unique_id to make the kwargs difficult to collide with any route function parameter
@@ -114,12 +114,12 @@ class _PaginationOperation:
             self._original_route_function
         )
 
-        if not template_context and not item_schema:
+        if not as_template_context and not item_schema:
             raise ecm.exceptions.ImproperConfiguration(
                 "Must supply value for either `template_context` or `item_schema`"
             )
 
-        if not template_context:
+        if not as_template_context:
             # if pagination is not for template context, then we create a response schema for the api response
             response_schema = self._pagination_view.get_output_schema(item_schema)
             ecm.set_metadata(RESPONSE_OVERRIDE_KEY, {200: response_schema})(
@@ -133,7 +133,7 @@ class _PaginationOperation:
 
             items = self._original_route_function(*args, **func_kwargs)
 
-            if not template_context:
+            if not as_template_context:
                 return self._pagination_view.api_paginate(
                     items,
                     paginate_input,
@@ -156,10 +156,10 @@ class _PaginationOperation:
 
 class _AsyncPaginationOperation(_PaginationOperation):
     def _get_route_function_wrapper(
-        self, template_context: bool, item_schema: t.Type[BaseModel]
+        self, as_template_context: bool, item_schema: t.Type[BaseModel]
     ) -> t.Tuple[ecm.params.ExtraEndpointArg, ecm.params.ExtraEndpointArg, t.Callable]:
         _paginate_args, execution_context, _ = super()._get_route_function_wrapper(
-            template_context, item_schema
+            as_template_context, item_schema
         )
 
         async def as_view(*args: t.Any, **kw: t.Any) -> t.Any:
@@ -169,12 +169,13 @@ class _AsyncPaginationOperation(_PaginationOperation):
             context: ecm.IExecutionContext = execution_context.resolve(func_kwargs)
 
             items = await self._original_route_function(*args, **func_kwargs)
+            request = context.switch_to_http_connection().get_request()
 
-            if not template_context:
+            if not as_template_context:
                 return self._pagination_view.api_paginate(
                     items,
                     paginate_input,
-                    context.switch_to_http_connection().get_request(),
+                    request,
                 )
 
             filter_query, extra_context = self._prepare_template_response(items)
@@ -182,7 +183,7 @@ class _AsyncPaginationOperation(_PaginationOperation):
             pagination_context = self._pagination_view.pagination_context(
                 filter_query,
                 paginate_input,
-                context.switch_to_http_connection().get_request(),
+                request,
             )
             extra_context.update(pagination_context)
 

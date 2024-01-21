@@ -19,6 +19,13 @@ from .cli import DBCommands
 from .schemas import MigrationOption, SQLAlchemyConfig
 
 
+def _invalid_configuration(message: str) -> t.Callable:
+    def _raise_exception():
+        raise RuntimeError(message)
+
+    return _raise_exception
+
+
 @Module(commands=[DBCommands])
 class EllarSQLModule(ModuleBase, IModuleSetup, IApplicationShutdown):
     async def on_shutdown(self) -> None:
@@ -83,12 +90,48 @@ class EllarSQLModule(ModuleBase, IModuleSetup, IApplicationShutdown):
                     scope=request_or_transient_scope,
                 )
             )
+            providers.append(
+                ProviderConfig(
+                    Session,
+                    use_value=_invalid_configuration(
+                        f"{Session} is not configured based on your database options. Please use {AsyncSession}"
+                    ),
+                    scope=request_or_transient_scope,
+                )
+            )
+            providers.append(
+                ProviderConfig(
+                    sa.Engine,
+                    use_value=_invalid_configuration(
+                        f"{sa.Engine} is not configured based on your database options. Please use {AsyncEngine}"
+                    ),
+                    scope=request_or_transient_scope,
+                )
+            )
         else:
             providers.append(ProviderConfig(sa.Engine, use_value=db_service.engine))
             providers.append(
                 ProviderConfig(
                     Session,
                     use_value=lambda: db_service.session_factory(),
+                    scope=request_or_transient_scope,
+                )
+            )
+            providers.append(
+                ProviderConfig(
+                    AsyncSession,
+                    use_value=_invalid_configuration(
+                        f"{AsyncSession} is not configured based on your database options. Please use {Session}"
+                    ),
+                    scope=request_or_transient_scope,
+                )
+            )
+            providers.append(
+                ProviderConfig(
+                    AsyncEngine,
+                    use_value=_invalid_configuration(
+                        f"{AsyncEngine} is not configured based on your database options. Please use {sa.Engine}"
+                    ),
                     scope=request_or_transient_scope,
                 )
             )
@@ -122,10 +165,8 @@ class EllarSQLModule(ModuleBase, IModuleSetup, IApplicationShutdown):
         root_path: str,
         override_config: t.Dict[str, t.Any],
     ) -> DynamicModule:
-        if config.get("SQLALCHEMY_CONFIG") and isinstance(
-            config.SQLALCHEMY_CONFIG, dict
-        ):
-            defined_config = dict(config.SQLALCHEMY_CONFIG)
+        if config.get("ELLAR_SQL") and isinstance(config.ELLAR_SQL, dict):
+            defined_config = dict(config.ELLAR_SQL)
             defined_config.update(override_config)
             defined_config.setdefault("root_path", root_path)
 
@@ -140,4 +181,4 @@ class EllarSQLModule(ModuleBase, IModuleSetup, IApplicationShutdown):
             )
 
             return module.__setup_module(schema)
-        raise RuntimeError("Could not find `SQLALCHEMY_CONFIG` in application config.")
+        raise RuntimeError("Could not find `ELLAR_SQL` in application config.")

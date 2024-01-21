@@ -3,7 +3,7 @@ from ellar_sql.schemas import ModelBaseConfig
 
 
 class Base(model.Model):
-    __base_config__ = ModelBaseConfig(make_declarative_base=True)
+    __base_config__ = ModelBaseConfig(as_base=True)
 
     metadata = model.MetaData(
         naming_convention={

@@ -14,7 +14,7 @@ convention = {
 
 
 class Base(Model):
-  __base_config__ = {'make_declarative_base': True}
+  __base_config__ = {'as_base': True}
   __database__ = 'default'
 
   metadata = MetaData(naming_convention=convention)

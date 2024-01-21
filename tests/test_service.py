@@ -6,7 +6,7 @@ from ellar_sql import model
 from ellar_sql.constant import DATABASE_BIND_KEY, DEFAULT_KEY
 from ellar_sql.model.database_binds import (
     __model_database_metadata__,
-    get_database_bind,
+    get_metadata,
 )
 from ellar_sql.schemas import ModelBaseConfig
 from ellar_sql.services import EllarSQLService
@@ -56,7 +56,7 @@ def test_custom_metadata_2x(ignore_base):
 
     class Base(model.Model):
         __base_config__ = ModelBaseConfig(
-            use_bases=[model.DeclarativeBase], make_declarative_base=True
+            use_bases=[model.DeclarativeBase], as_base=True
         )
         metadata = custom_metadata
 
@@ -72,8 +72,8 @@ def test_metadata_per_bind(tmp_path, ignore_base):
         },
         root_path=str(tmp_path),
     )
-    assert get_database_bind("a").info[DATABASE_BIND_KEY] == "a"
-    assert get_database_bind("default").info[DATABASE_BIND_KEY] == "default"
+    assert get_metadata("a").info[DATABASE_BIND_KEY] == "a"
+    assert get_metadata("default").info[DATABASE_BIND_KEY] == "default"
 
 
 def test_setup_fails_when_default_database_is_not_configured(tmp_path, ignore_base):
@@ -98,7 +98,7 @@ def test_setup_fails_when_default_database_is_not_configured(tmp_path, ignore_ba
 def test_copy_naming_convention(tmp_path, ignore_base):
     class Base(model.Model):
         __base_config__ = ModelBaseConfig(
-            use_bases=[model.DeclarativeBase], make_declarative_base=True
+            use_bases=[model.DeclarativeBase], as_base=True
         )
         metadata = model.MetaData(naming_convention={"pk": "spk_%(table_name)s"})
 
@@ -111,8 +111,7 @@ def test_copy_naming_convention(tmp_path, ignore_base):
     )
     assert Base.metadata.naming_convention["pk"] == "spk_%(table_name)s"
     assert (
-        get_database_bind("a").naming_convention
-        == get_database_bind("default").naming_convention
+        get_metadata("a").naming_convention == get_metadata("default").naming_convention
     )
 
 
@@ -206,7 +205,7 @@ def test_reflect(tmp_path, ignore_base):
         },
         root_path=str(tmp_path),
     )
-    default_metadata = get_database_bind("default")
+    default_metadata = get_metadata("default")
     assert not default_metadata.tables
 
     db_service.reflect()
@@ -239,14 +238,14 @@ async def test_service_create_drop_all_async(tmp_path, ignore_base):
     with pytest.raises(sa_exc.OperationalError):
         await session.execute(model.select(Post))
 
-    await db_service.create_all_async()
+    db_service.create_all()
 
     user_res = await session.execute(model.select(User))
     user_res.scalars()
     post_res = await session.execute(model.select(Post))
     post_res.scalars()
 
-    await db_service.drop_all_async()
+    db_service.drop_all()
 
     with pytest.raises(sa_exc.OperationalError):
         await session.execute(model.select(User))
@@ -268,7 +267,7 @@ async def test_service_reflect_async(tmp_path, ignore_base):
     model.Table(
         "post", model.Column("id", model.Integer, primary_key=True), __database__="post"
     )
-    await db_service.create_all_async()
+    db_service.create_all()
     del db_service
     __model_database_metadata__.clear()
 
@@ -279,28 +278,13 @@ async def test_service_reflect_async(tmp_path, ignore_base):
         },
         root_path=str(tmp_path),
     )
-    default_metadata = get_database_bind("default")
+    default_metadata = get_metadata("default")
     assert not default_metadata.tables
 
-    await db_service.reflect_async()
+    db_service.reflect()
 
     assert "user" in __model_database_metadata__["default"].tables
     assert "post" in __model_database_metadata__["post"].tables
-
-
-def test_using_create_drop_reflect_for_async_engine_fails(
-    db_service_async, ignore_base
-):
-    model.Table("user", model.Column("id", model.Integer, primary_key=True))
-
-    with pytest.raises(Exception, match="Use `create_all_async` instead"):
-        db_service_async.create_all()
-
-    with pytest.raises(Exception, match="Use `drop_all_async` instead"):
-        db_service_async.drop_all()
-
-    with pytest.raises(Exception, match="Use `reflect_async` instead"):
-        db_service_async.reflect()
 
 
 @pytest.mark.asyncio
@@ -310,13 +294,13 @@ async def test_using_create_drop_reflect_async_for_sync_engine_work(
     class User(model.Model):
         id = model.Column(model.Integer, primary_key=True)
 
-    await db_service.create_all_async()
+    db_service.create_all()
     session = db_service.session_factory()
     session.execute(model.select(User)).scalars()
 
-    await db_service.drop_all_async()
+    db_service.drop_all()
 
     with pytest.raises(sa_exc.OperationalError):
         session.execute(model.select(User)).scalars()
 
-    await db_service.reflect_async()
+    db_service.reflect()

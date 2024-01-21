@@ -26,8 +26,6 @@ depends_on = ${repr(depends_on)}
     db_names = list(db_service.engines.keys())
 %>
 
-% if len(db_names) > 1:
-
 def upgrade(engine_name):
     globals()["upgrade_%s" % engine_name]()
 
@@ -47,14 +45,3 @@ def downgrade_${db_name}():
     ${context.get("%s_downgrades" % db_name, "pass")}
 
 % endfor
-
-% else:
-
-def upgrade():
-    ${upgrades if upgrades else "pass"}
-
-
-def downgrade():
-    ${downgrades if downgrades else "pass"}
-
-% endif
