@@ -81,7 +81,9 @@ class MultipleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
                     directives[:] = []
                     logger.info("No changes in schema detected.")
 
-    def run_migrations_offline(self, context: "EnvironmentContext") -> None:
+    def run_migrations_offline(
+        self, context: "EnvironmentContext"
+    ) -> None:  # pragma:no cover
         """Run migrations in 'offline' mode.
 
         This configures the context with just a URL
