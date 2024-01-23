@@ -1,13 +1,13 @@
 # **Quick Start**
-In this section,
-we shall go over how to set up **EllarSQL** in your ellar application
-and have all necessary service registered and configuration set and ready to use.
+In this segment, we will walk through the process of configuring **EllarSQL** within your Ellar application, 
+ensuring that all essential services are registered, configurations are set, and everything is prepared for immediate use.
 
-Before we proceed, we assume you have a clear understanding 
-of how [Ellar Modules](https://python-ellar.github.io/ellar/basics/dynamic-modules/#module-dynamic-setup){target="_blank"} work.
+Before we delve into the setup instructions, it is assumed that you possess a comprehensive 
+understanding of how [Ellar Modules](https://python-ellar.github.io/ellar/basics/dynamic-modules/#module-dynamic-setup){target="_blank"} 
+operate.
 
 ## **Installation**
-Let's install all necessary packages. Also assuming your python environment has been configured:
+Let us install all the required packages, assuming that your Python environment has been properly configured:
 
 #### **For Existing Project:**
 ```shell
@@ -99,10 +99,10 @@ class UsersController(ecm.ControllerBase):
 ```
 
 ## **EllarSQLModule Setup**
-In `root_module.py`, we need to do two things:
+In the `root_module.py` file, two main tasks need to be performed:
 
-- Register `UsersController` to have `/users` available when we start the application
-- configure `EllarSQLModule` to configure and register all necessary services such as `EllarSQLService`, `Session` and `Engine`
+1. Register the `UsersController` to make the `/users` endpoint available when starting the application.
+2. Configure the `EllarSQLModule`, which will set up and register essential services such as `EllarSQLService`, `Session`, and `Engine`.
 
 ```python title="db_learning/root_module.py"
 from ellar.common import Module, exception_handler, IExecutionContext, JSONResponse, Response, IApplicationStartup
@@ -110,7 +110,6 @@ from ellar.app import App
 from ellar.core import ModuleBase
 from ellar_sql import EllarSQLModule, EllarSQLService
 from .controller import UsersController
-
 
 @Module(
     modules=[EllarSQLModule.setup(
@@ -133,19 +132,19 @@ class ApplicationModule(ModuleBase, IApplicationStartup):
     def exception_404_handler(cls, ctx: IExecutionContext, exc: Exception) -> Response:
         return JSONResponse(dict(detail="Resource not found."), status_code=404)
 ```
-In the above illustration,
-we registered `UserController` and `EllarSQLModule` with some configurations on database and migration options.
-See more on `EllarSQLModule` configurations.
 
-Also, on the `on_startup` function, we retrieved `EllarSQLService` registered into the system through `EllarSQLModule`,
-and call the `create_all()` function to create the SQLAlchemy tables.
+In the provided code snippet:
 
-At this point, we are ready to test the application. 
+- We registered `UserController` and `EllarSQLModule` with specific configurations for the database and migration options. For more details on [`EllarSQLModule` configurations](./configuration.md#ellarsqlmodule-config).
+
+- In the `on_startup` method, we obtained the `EllarSQLService` from the Ellar Dependency Injection container using `EllarSQLModule`. Subsequently, we invoked the `create_all()` method to generate the necessary SQLAlchemy tables.
+
+With these configurations, the application is now ready for testing.
 ```shell
 ellar runserver --reload
 ```
-Also,
-remember to uncomment the `OpenAPIModule` configurations
-in `server.py` to be able to visualize and interact with the `/users` the endpoint.
+Additionally, please remember to uncomment the configurations for the `OpenAPIModule` in the `server.py` 
+file to enable visualization and interaction with the `/users` endpoint.
 
-With that said, visit [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs){target="_blank"}
+Once done, 
+you can access the OpenAPI documentation at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs){target="_blank"}.

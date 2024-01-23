@@ -1,32 +1,35 @@
 # **Models and Tables**
-`Model` from `ellar_sql.model.Model` package is a factory class for creating `SQLAlchemy` model. 
-It also manages a model database key and associates it to its Metadata and engine. 
-
-`Model` can be by defining `__base_config__` at the class level. This is necessary for a 
-case where we want to make a `Base` class that will be inherited through the application or change the declarative type
-such as [DeclarativeBase](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBase){target="_blank"} or 
-[DeclarativeBaseNoMeta](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBaseNoMeta){target="_blank"}
-
-`Model` configuration parameters:
-
-- **as_base**: Indicates if the class should be treated as a Base class for other model definitions. `Default: True` 
-- **use_base**: Indicates base classes that will be used to create a model base. `Default=[]`
+The `ellar_sql.model.Model` class acts as a factory for creating `SQLAlchemy` models, and 
+associating the generated models with the corresponding **Metadata** through their designated **`__database__`** key.
 
 
-## **Base Class**
-`Model` treats each model as a standalone model. This means each `model.Model` has a separate **declarative** base created for it 
-and the `__database__` key is used to determine its Metadata reference. 
+This class can be configured through the `__base_config__` attribute, allowing you to specify how your `SQLAlchemy` model should be created. 
+The `__base_config__` attribute can be of type `ModelBaseConfig`, which is a dataclass, or a dictionary with keys that 
+match the attributes of `ModelBaseConfig`.
 
-Let's create a class with **DeclarativeBase**
+Attributes of `ModelBaseConfig`:
+
+- **as_base**: Indicates whether the class should be treated as a `Base` class for other model definitions, similar to creating a Base from a [DeclarativeBase](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBase){target="_blank"} or [DeclarativeBaseNoMeta](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBaseNoMeta){target="_blank"} class. *(Default: False)*
+- **use_base**: Specifies the base classes that will be used to create the `SQLAlchemy` model. *(Default: [])*
+
+## **Creating a Base Class**
+`Model` treats each model as a standalone entity. Each instance of `model.Model` creates a distinct **declarative** base for itself, using the `__database__` key as a reference to determine its associated **Metadata**. Consequently, models sharing the same `__database__` key will utilize the same **Metadata** object.
+
+Let's explore how we can create a `Base` model using `Model`, similar to the approach in traditional `SQLAlchemy`.
+
 ```python
 from ellar_sql import model, ModelBaseConfig
 
 
 class Base(model.Model):
     __base_config__ = ModelBaseConfig(as_base=True, use_bases=[model.DeclarativeBase])
+
+    
+assert issubclass(Base, model.DeclarativeBase)
 ```
-If desired, you can enable [SQLAlchemy’s native support for data classes](https://docs.sqlalchemy.org/en/20/changelog/whatsnew_20.html#native-support-for-dataclasses-mapped-as-orm-models){target="_blank"} 
-by adding MappedAsDataclass as an additional parent class.
+
+If you are interested in [SQLAlchemy’s native support for data classes](https://docs.sqlalchemy.org/en/20/changelog/whatsnew_20.html#native-support-for-dataclasses-mapped-as-orm-models){target="_blank"}, 
+then you can add `MappedAsDataclass` to `use_bases` as shown below:
 
 ```python
 from ellar_sql import model, ModelBaseConfig
@@ -34,12 +37,19 @@ from ellar_sql import model, ModelBaseConfig
 
 class Base(model.Model):
     __base_config__ = ModelBaseConfig(as_base=True, use_bases=[model.DeclarativeBase, model.MappedAsDataclass])
+
+assert issubclass(Base, model.MappedAsDataclass)
 ```
 
-Optionally, you have the flexibility to construct the SQLAlchemy object with a custom [`MetaData`](https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.MetaData){target="_blank"} object. 
-This customization enables you to define a specific **naming convention** for constraints. 
-This becomes particularly valuable as it ensures consistency and predictability in constraint names. 
-This predictability proves especially beneficial when utilizing migrations, as detailed by [Alembic](https://alembic.sqlalchemy.org/en/latest/naming.html){target="_blank"}.
+In the examples above, `Base` classes are created, all subclassed from the `use_bases` provided, and with the `as_base` 
+option, the factory creates the `Base` class as a `Base`.
+
+## Create base with MetaData
+You can also configure the SQLAlchemy object with a custom [`MetaData`](https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.MetaData){target="_blank"} object. 
+For instance, you can define a specific **naming convention** for constraints, ensuring consistency and predictability in constraint names. 
+This can be particularly beneficial during migrations, as detailed by [Alembic](https://alembic.sqlalchemy.org/en/latest/naming.html){target="_blank"}.
+
+For example:
 
 ```python
 from ellar_sql import model, ModelBaseConfig
@@ -55,10 +65,12 @@ class Base(model.Model):
         "pk": "pk_%(table_name)s"
     })
 ```
+
 ## **Abstract Models and Mixins**
-If the desired behavior is applicable only to specific models rather than all models, consider using an abstract model base class to customize only those models.
-For instance, if certain models need to track their creation or update timestamps, 
-this approach allows for targeted customization.
+If the desired behavior is only applicable to specific models rather than all models, 
+you can use an abstract model base class to customize only those models. 
+For example, if certain models need to track their creation or update **timestamps**, t
+his approach allows for targeted customization.
 
 ```python
 from datetime import datetime, timezone
@@ -98,9 +110,8 @@ class Book(model.Model, TimestampModel):
 ```
 
 ## **Defining Models**
-Unlike plain SQLAlchemy, EllarSQL model will automatically generate a table name 
-if `__tablename__` is not set and a primary key column is defined.
-This can be **disabled** by setting a value for `__tablename__` or defining `__tablename__` as a **declarative_attr**
+Unlike plain SQLAlchemy, **EllarSQL** models will automatically generate a table name if the `__tablename__` attribute is not set, 
+provided a primary key column is defined.
 
 ```python
 from ellar_sql import model
@@ -125,12 +136,12 @@ For a comprehensive guide on defining model classes declaratively, refer to
 This resource provides detailed information and insights into the declarative approach for defining model classes.
 
 ## **Defining Tables**
-The table class is designed to receive a table name, followed by columns and other table components such as constraints.
+The table class is designed to receive a table name, followed by **columns** and other table **components** such as constraints.
 
-EllarSQL enhances the functionality of the SQLAlchemy Table by facilitating the creation or 
-selection of metadata based on the `__database__` argument.
+EllarSQL enhances the functionality of the SQLAlchemy Table 
+by facilitating the selection of **Metadata** based on the `__database__` argument.
 
-Directly creating a table proves particularly valuable when establishing many-to-many relationships. 
+Directly creating a table proves particularly valuable when establishing **many-to-many** relationships. 
 In such cases, the association table doesn't need its dedicated model class; rather, it can be conveniently accessed 
 through the relevant relationship attributes on the associated models.
 
@@ -145,14 +156,13 @@ author_book_m2m = model.Table(
 ```
 
 ## **Quick Tutorial**
-In this section, we'll delve into straightforward CRUD operations using the ORM objects. 
+In this section, we'll delve into straightforward **CRUD** operations using the ORM objects. 
 However, if you're not well-acquainted with SQLAlchemy,
 feel free to explore their tutorial 
 on [ORM](https://docs.sqlalchemy.org/tutorial/orm_data_manipulation.html){target="_blank"}
 for a more comprehensive understanding.
 
-### **Create a Model**
-Having understood, `Model` usage. Let's create a User model
+Having understood, `Model` usage. Let's create a `User` model
 
 ```python
 from ellar_sql import model
@@ -264,6 +274,7 @@ In the process of `EllarSQLModule` setup, three services are registered to the E
 - `Session`SQLAlchemy Session of the default database configuration
 
 Although with `EllarSQLService` you can get the `engine` and `session`. It's there for easy of access.
+
 ```python
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm

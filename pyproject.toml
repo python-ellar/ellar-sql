@@ -34,9 +34,7 @@ classifiers = [
 dependencies = [
     "ellar >= 0.6.7",
     "sqlalchemy >= 2.0.23",
-    "alembic >= 1.10.0",
-    "python-magic >= 0.4.27",
-    "pillow >= 10.1.0"
+    "alembic >= 1.10.0"
 ]
 
 dev = [

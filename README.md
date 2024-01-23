@@ -20,6 +20,8 @@ EllarSQL Module adds support for `SQLAlchemy` and `Alembic` package to your Ella
 $(venv) pip install ellar-sql
 ```
 
+This library was inspired by [Flask-SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/){target="_blank"}
+
 ## Features
 
 - Migration

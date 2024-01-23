@@ -1,13 +1,12 @@
 # **EllarSQLModule Config**
+**`EllarSQLModule`** is an Ellar Dynamic Module that offers two ways of configuration:
 
-**`EllarSQLModule`** is a versatile module, allowing configuration through the application `Config`. 
-This configuration can be done either using `EllarSQLModule.register_setup()` within your application setup or directly 
-during module registration with `EllarSQLModule.setup()`.
+- `EllarSQLModule.register_setup()`: This method registers a `ModuleSetup` that depends on the application config.
+- `EllarSQLModule.setup()`: This method immediately sets up the module with the provided options.
 
-While examples have been provided for using `EllarSQLModule.setup()`, this section will shed light 
-on the usage of `EllarSQLModule.register_setup()`. Before diving into that, let's first explore 
-the setup options available for `EllarSQLModule`.
+While we've explored many examples using `EllarSQLModule.setup()`, this section will focus on the usage of `EllarSQLModule.register_setup()`.
 
+Before delving into that, let's first explore the setup options available for `EllarSQLModule`.
 ## **EllarSQLModule Configuration Parameters**
 
 - **databases**: _typing.Union[str, typing.Dict[str, typing.Any]]_:
@@ -128,16 +127,17 @@ For more in-depth information
 on [dealing with disconnects](https://docs.sqlalchemy.org/core/pooling.html#dealing-with-disconnects){target="_blank"}, 
 refer to SQLAlchemy's documentation on handling connection issues.
 
-## **EllarSQLModule With App Config**
-As stated above, **EllarSQLModule** can be configured from application through `EllarSQLModule.register_setup`.
-This will register a [ModuleSetup](https://python-ellar.github.io/ellar/basics/dynamic-modules/#modulesetup){target="_blank"} factory that checks for `ELLAR_SQL` in application config.
-The value of `ELLAR_SQL` read from the application config will be passed `EllarSQLModule` setup action
-which validates and initializes the module.
+## **EllarSQLModule RegisterSetup**
+As mentioned earlier, **EllarSQLModule** can be configured from the application through `EllarSQLModule.register_setup`. 
+This process registers a [ModuleSetup](https://python-ellar.github.io/ellar/basics/dynamic-modules/#modulesetup){target="_blank"} factory
+that depends on the Application Config object. 
+The factory retrieves the `ELLAR_SQL` attribute from the config and validates the data before passing it to `EllarSQLModule` for setup.
 
-It's important to note
-that `ELLAR_SQL` will be a dictionary object with the above [configuration parameters](#ellarsqlmodule-configuration-parameters) as keys.
+It's essential to note 
+that `ELLAR_SQL` will be a dictionary object with the [configuration parameters](#ellarsqlmodule-configuration-parameters) 
+mentioned above as keys.
 
-A Quick example:
+Here's a quick example:
 ```python title="db_learning/root_module.py"
 from ellar.common import Module, exception_handler, IExecutionContext, JSONResponse, Response, IApplicationStartup
 from ellar.app import App
@@ -180,8 +180,10 @@ class DevelopmentConfig(BaseConfig):
         'models': []
     }
 ```
-We have added config for **EllarSQLModule** through `ELLAR_SQL`. And from there, the rest of the actions 
-will be the same as to normal registration with `EllarSQLModule.setup()`.
+The registered ModuleSetup factory reads the `ELLAR_SQL` value and configures the `EllarSQLModule` appropriately.
 
-But with this approach,
-we can seamlessly change **EllarSQLModule** configuration in any environment like CI, Development, Staging or Production.
+This approach is particularly useful when dealing with multiple environments. 
+It allows for seamless modification of the **ELLAR_SQL** values in various environments such as 
+Continuous Integration (CI), Development, Staging, or Production. 
+You can easily change the settings for each environment 
+and export the configurations as a string to be imported into `ELLAR_CONFIG_MODULE`.

@@ -1,15 +1,15 @@
 # **Migrations**
-EllarSQL also extends Alembic package
-to add migration functionality to your application and make database operations available through EllarCLI commandline interface.
+EllarSQL also extends **Alembic** package
+to add migration functionality and make database operations accessible through **EllarCLI** commandline interface.
 
-EllarSQL with Alembic does not override Alembic action rather provide Alembic all the configs/information
-it needs to for a proper migration operation in your application.
+**EllarSQL** with Alembic does not override Alembic action rather provide Alembic all the configs/information
+it needs to for a proper migration/database operations.
 Its also still possible to use Alembic outside EllarSQL setup when necessary.
 
 This section is inspired by [`Flask Migrate`](https://flask-migrate.readthedocs.io/en/latest/#)
 
 ## **Quick Example**
-We assume you have set up `EllarSQLModule` in your application and you have specified `migration_options`.
+We assume you have set up `EllarSQLModule` in your application, and you have specified `migration_options`.
 
 Create a simple `User` model as shown below:
 

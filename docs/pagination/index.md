@@ -1,6 +1,5 @@
 # **Pagination**
 
-
 Pagination is a common practice for large datasets, 
 enhancing user experience by breaking content into manageable pages. 
 It optimizes load times and navigation and allows users to explore extensive datasets with ease 

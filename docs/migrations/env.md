@@ -3,6 +3,7 @@
 In the generated migration template, EllarSQL adopts an async-first approach for handling migration file generation. 
 This approach simplifies the execution of migrations for both `Session`, `Engine`, `AsyncSession`, and `AsyncEngine`, 
 but it also introduces a certain level of complexity.
+
 ```python
 from logging.config import fileConfig
 
