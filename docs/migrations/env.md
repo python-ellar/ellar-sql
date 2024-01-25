@@ -138,7 +138,7 @@ class MyCustomMigrationEnv(AlembicEnvMigrationBase):
 
         """
         key, engine = self.db_service.engines.popitem()
-        metadata = get_metadata(key, certain=True)
+        metadata = get_metadata(key, certain=True).metadata
 
         conf_args = {}
         conf_args.setdefault(

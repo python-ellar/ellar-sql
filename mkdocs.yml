@@ -75,6 +75,8 @@ nav:
   - Migrations:
       - index: migrations/index.md
       - customizing env: migrations/env.md
+  - Testing:
+      - index: testing/index.md
 
 markdown_extensions:
   - attr_list

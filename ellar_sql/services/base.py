@@ -11,7 +11,6 @@ from ellar.common.utils.importer import (
     get_main_directory_by_stack,
     module_import,
 )
-from ellar.events import app_context_teardown_events
 from ellar.threading import execute_coroutine_with_sync_worker
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -63,12 +62,6 @@ class EllarSQLService:
 
         self._setup(databases, models=models, echo=echo)
         self.session_factory = self.get_scoped_session()
-        app_context_teardown_events.connect(self._on_application_tear_down)
-
-    async def _on_application_tear_down(self) -> None:
-        res = self.session_factory.remove()
-        if isinstance(res, t.Coroutine):
-            await res
 
     @property
     def has_async_engine_driver(self) -> bool:
@@ -291,6 +284,6 @@ class EllarSQLService:
                 message = f"Bind key '{key}' is not in 'Database' config."
                 raise sa_exc.UnboundExecutionError(message) from None
 
-            metadata = get_metadata(key, certain=True)
-            result.append(MetaDataEngine(metadata=metadata, engine=engine))
+            db_metadata = get_metadata(key, certain=True)
+            result.append(MetaDataEngine(metadata=db_metadata.metadata, engine=engine))
         return result

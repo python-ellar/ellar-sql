@@ -104,7 +104,7 @@ class MultipleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
             logger.info("Migrating database %s" % key)
 
             url = str(engine.url).replace("%", "%%")
-            metadata = get_metadata(key, certain=True)
+            metadata = get_metadata(key, certain=True).metadata
 
             file_ = "%s.sql" % key
             logger.info("Writing output to %s" % file_)
@@ -170,7 +170,7 @@ class MultipleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         res = []
 
         for key, engine in self.db_service.engines.items():
-            metadata = get_metadata(key, certain=True)
+            metadata = get_metadata(key, certain=True).metadata
 
             if engine.dialect.is_async:
                 async_engine = AsyncEngine(engine)

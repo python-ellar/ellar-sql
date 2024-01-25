@@ -59,5 +59,7 @@ class Table(sa.Table):
         if not args or (len(args) >= 2 and isinstance(args[1], sa.MetaData)):
             return super().__new__(cls, *args, **kwargs)
 
-        metadata = make_metadata(__database__ or DEFAULT_KEY)
-        return super().__new__(cls, *[args[0], metadata, *args[1:]], **kwargs)
+        db_metadata = make_metadata(__database__ or DEFAULT_KEY)
+        return super().__new__(
+            cls, *[args[0], db_metadata.metadata, *args[1:]], **kwargs
+        )

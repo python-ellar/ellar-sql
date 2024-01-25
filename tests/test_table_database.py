@@ -6,7 +6,7 @@ def test_bind_key_default(ignore_base):
     user_table = model.Table(
         "user", model.Column("id", model.Integer, primary_key=True)
     )
-    default_metadata = get_metadata("default")
+    default_metadata = get_metadata("default").metadata
     assert user_table.metadata is default_metadata
 
 
@@ -16,7 +16,7 @@ def test_metadata_per_bind(ignore_base):
         model.Column("id", model.Integer, primary_key=True),
         __database__="other",
     )
-    other_metadata = get_metadata("other")
+    other_metadata = get_metadata("other").metadata
     assert user_table.metadata is other_metadata
 
 
@@ -29,8 +29,8 @@ def test_multiple_binds_same_table_name(ignore_base):
         model.Column("id", model.Integer, primary_key=True),
         __database__="other",
     )
-    other_metadata = get_metadata("other")
-    default_metadata = get_metadata("default")
+    other_metadata = get_metadata("other").metadata
+    default_metadata = get_metadata("default").metadata
     assert user1_table.metadata is default_metadata
     assert user2_table.metadata is other_metadata
 

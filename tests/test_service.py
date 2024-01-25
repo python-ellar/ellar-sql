@@ -72,8 +72,8 @@ def test_metadata_per_bind(tmp_path, ignore_base):
         },
         root_path=str(tmp_path),
     )
-    assert get_metadata("a").info[DATABASE_BIND_KEY] == "a"
-    assert get_metadata("default").info[DATABASE_BIND_KEY] == "default"
+    assert get_metadata("a").metadata.info[DATABASE_BIND_KEY] == "a"
+    assert get_metadata("default").metadata.info[DATABASE_BIND_KEY] == "default"
 
 
 def test_setup_fails_when_default_database_is_not_configured(tmp_path, ignore_base):
@@ -111,7 +111,8 @@ def test_copy_naming_convention(tmp_path, ignore_base):
     )
     assert Base.metadata.naming_convention["pk"] == "spk_%(table_name)s"
     assert (
-        get_metadata("a").naming_convention == get_metadata("default").naming_convention
+        get_metadata("a").metadata.naming_convention
+        == get_metadata("default").metadata.naming_convention
     )
 
 
@@ -205,13 +206,13 @@ def test_reflect(tmp_path, ignore_base):
         },
         root_path=str(tmp_path),
     )
-    default_metadata = get_metadata("default")
+    default_metadata = get_metadata("default").metadata
     assert not default_metadata.tables
 
     db_service.reflect()
 
-    assert "user" in __model_database_metadata__["default"].tables
-    assert "post" in __model_database_metadata__["post"].tables
+    assert "user" in __model_database_metadata__["default"].metadata.tables
+    assert "post" in __model_database_metadata__["post"].metadata.tables
 
 
 @pytest.mark.asyncio
@@ -278,13 +279,13 @@ async def test_service_reflect_async(tmp_path, ignore_base):
         },
         root_path=str(tmp_path),
     )
-    default_metadata = get_metadata("default")
+    default_metadata = get_metadata("default").metadata
     assert not default_metadata.tables
 
     db_service.reflect()
 
-    assert "user" in __model_database_metadata__["default"].tables
-    assert "post" in __model_database_metadata__["post"].tables
+    assert "user" in __model_database_metadata__["default"].metadata.tables
+    assert "post" in __model_database_metadata__["post"].metadata.tables
 
 
 @pytest.mark.asyncio

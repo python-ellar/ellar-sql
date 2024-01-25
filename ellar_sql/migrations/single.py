@@ -53,7 +53,7 @@ class SingleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         """
 
         key, engine = self.db_service.engines.popitem()
-        metadata = get_metadata(key, certain=True)
+        metadata = get_metadata(key, certain=True).metadata
 
         conf_args = self.get_user_context_configurations()
 
@@ -95,7 +95,7 @@ class SingleDatabaseAlembicEnvMigration(AlembicEnvMigrationBase):
         """
 
         key, engine = self.db_service.engines.popitem()
-        metadata = get_metadata(key, certain=True)
+        metadata = get_metadata(key, certain=True).metadata
 
         migration_action_partial = functools.partial(
             self._migration_action, metadata=metadata, context=context

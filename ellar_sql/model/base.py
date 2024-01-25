@@ -26,7 +26,9 @@ def _update_metadata(namespace: t.Dict[str, t.Any]) -> None:
         if not has_metadata(database_key):
             # verify the key exist and store the metadata
             metadata.info[DATABASE_BIND_KEY] = database_key
-            update_database_metadata(database_key, metadata)
+            update_database_metadata(
+                database_key, metadata, sa_orm.registry(metadata=metadata)
+            )
         # if we have saved metadata then, its save to remove it and allow
         # DatabaseBindKeyMixin to set it back when the class if fully created.
         namespace.pop("metadata")
@@ -107,10 +109,12 @@ class ModelMeta(type):
                 lambda ns: ns.update(namespace),
             )
 
+            # model = t.cast(t.Type[sa_orm.DeclarativeBase], model)
+
             if not has_metadata(DEFAULT_KEY):
                 # Use the model's metadata as the default metadata.
                 model.metadata.info[DATABASE_BIND_KEY] = DEFAULT_KEY
-                update_database_metadata(DEFAULT_KEY, model.metadata)
+                update_database_metadata(DEFAULT_KEY, model.metadata, model.registry)
             elif not has_metadata(model.metadata.info.get(DATABASE_BIND_KEY)):
                 # Use the passed in default metadata as the model's metadata.
                 model.metadata = get_metadata(DEFAULT_KEY, certain=True)
@@ -118,18 +122,17 @@ class ModelMeta(type):
             return model
 
         # _update_metadata(namespace)
+        __base_config__ = ModelBaseConfig(use_bases=options.use_bases, as_base=True)
 
         base = ModelMeta(
             "ModelBase",
             bases,
-            {
-                "__base_config__": ModelBaseConfig(
-                    use_bases=options.use_bases, as_base=True
-                )
-            },
+            {"__base_config__": __base_config__},
         )
 
-        return types.new_class(name, (base,), {}, lambda ns: ns.update(namespace))
+        return types.new_class(
+            name, (base,), {"options": options}, lambda ns: ns.update(namespace)
+        )
 
 
 class ModelBase(ModelDataExportMixin):
@@ -155,9 +158,6 @@ class ModelBase(ModelDataExportMixin):
         __table_args__: t.Any
 
         def __init__(self, **kwargs: t.Any) -> None:
-            ...
-
-        def dict(self, exclude: t.Optional[t.Set[str]] = None) -> t.Dict[str, t.Any]:
             ...
 
         def _sa_inspect_type(self) -> sa.Mapper["ModelBase"]:

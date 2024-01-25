@@ -83,3 +83,20 @@ class SQLAlchemyConfig(ecm.Serializer):
     engine_options: t.Optional[t.Dict[str, t.Any]] = None
 
     models: t.Optional[t.List[str]] = None
+
+
+@dataclass
+class ModelMetaStore:
+    base_config: ModelBaseConfig
+    pk_column: t.Optional[sa_orm.ColumnProperty] = None
+    columns: t.List[sa_orm.ColumnProperty] = field(default_factory=lambda: [])
+
+    def __post_init__(self) -> None:
+        if self.columns:
+            self.pk_column = next(c for c in self.columns if c.primary_key)
+
+    @property
+    def pk_name(self) -> t.Optional[str]:
+        if self.pk_column is not None:
+            return self.pk_column.key
+        return None

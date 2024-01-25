@@ -6,7 +6,8 @@ def test_bind_key_default(ignore_base):
     class User(model.Model):
         id = model.Column(model.Integer, primary_key=True)
 
-    assert User.metadata is get_metadata("default", certain=True)
+    assert User.metadata is get_metadata("default", certain=True).metadata
+    assert User.registry is get_metadata("default", certain=True).registry
 
 
 def test_metadata_per_bind(ignore_base):
@@ -14,7 +15,7 @@ def test_metadata_per_bind(ignore_base):
         __database__ = "other"
         id = model.Column(model.Integer, primary_key=True)
 
-    assert User.metadata is get_metadata("other", certain=True)
+    assert User.metadata is get_metadata("other", certain=True).metadata
 
 
 def test_multiple_binds_same_table_name(ignore_base):
@@ -27,8 +28,9 @@ def test_multiple_binds_same_table_name(ignore_base):
         __tablename__ = "user"
         id = model.Column(model.Integer, primary_key=True)
 
-    assert UserA.metadata is get_metadata("default", certain=True)
-    assert UserB.metadata is get_metadata("other", certain=True)
+    assert UserA.metadata is get_metadata("default", certain=True).metadata
+    assert UserB.metadata is get_metadata("other", certain=True).metadata
+    assert UserB.registry is get_metadata("other", certain=True).registry
     assert UserA.__table__.metadata is not UserB.__table__.metadata
 
 
@@ -43,7 +45,7 @@ def test_inherit_parent(ignore_base):
         id = model.Column(model.Integer, model.ForeignKey(User.id), primary_key=True)
         __mapper_args__ = {"polymorphic_identity": "admin"}
 
-    assert "admin" in get_metadata("auth", certain=True).tables
+    assert "admin" in get_metadata("auth", certain=True).metadata.tables
     # inherits metadata, doesn't set it directly
     assert "metadata" not in Admin.__dict__
 
@@ -56,7 +58,7 @@ def test_inherit_abstract_parent(ignore_base):
     class User(AbstractUser):
         id = model.Column(model.Integer, primary_key=True)
 
-    assert "user" in get_metadata("auth", certain=True).tables
+    assert "user" in get_metadata("auth", certain=True).metadata.tables
     assert "metadata" not in User.__dict__
 
 
@@ -83,5 +85,5 @@ def test_explicit_table(ignore_base):
         __database__ = "other"
         __table__ = user_table
 
-    assert User.__table__.metadata is get_metadata("auth")
+    assert User.__table__.metadata is get_metadata("auth").metadata
     assert get_metadata("other") is None

@@ -5,16 +5,21 @@ import sqlalchemy.orm as sa_orm
 
 from ellar_sql.constant import DATABASE_BIND_KEY, DEFAULT_KEY, NAMING_CONVERSION
 
-from .database_binds import get_metadata, has_metadata, update_database_metadata
+from .database_binds import (
+    DatabaseMetadata,
+    get_metadata,
+    has_metadata,
+    update_database_metadata,
+)
 
 
-def make_metadata(database_key: str) -> sa.MetaData:
+def make_metadata(database_key: str) -> DatabaseMetadata:
     if has_metadata(database_key):
         return get_metadata(database_key, certain=True)
 
     if database_key != DEFAULT_KEY:
         # Copy the naming convention from the default metadata.
-        naming_convention = make_metadata(DEFAULT_KEY).naming_convention
+        naming_convention = make_metadata(DEFAULT_KEY).metadata.naming_convention
     else:
         naming_convention = NAMING_CONVERSION
 
@@ -22,8 +27,10 @@ def make_metadata(database_key: str) -> sa.MetaData:
     metadata = sa.MetaData(
         naming_convention=naming_convention, info={DATABASE_BIND_KEY: database_key}
     )
-    update_database_metadata(database_key, metadata)
-    return metadata
+    update_database_metadata(
+        database_key, metadata, registry=sa_orm.registry(metadata=metadata)
+    )
+    return get_metadata(database_key, certain=True)
 
 
 def camel_to_snake_case(name: str) -> str:

@@ -2,11 +2,11 @@ import functools
 import typing as t
 
 import sqlalchemy as sa
-from ellar.app import current_injector
-from ellar.common import IApplicationShutdown, IModuleSetup, Module
+from ellar.common import IExecutionContext, IModuleSetup, Module, middleware
 from ellar.common.utils.importer import get_main_directory_by_stack
 from ellar.core import Config, DynamicModule, ModuleBase, ModuleSetup
 from ellar.di import ProviderConfig, request_or_transient_scope
+from ellar.events import app_context_teardown_events
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -27,11 +27,29 @@ def _invalid_configuration(message: str) -> t.Callable:
 
 
 @Module(commands=[DBCommands])
-class EllarSQLModule(ModuleBase, IModuleSetup, IApplicationShutdown):
-    async def on_shutdown(self) -> None:
-        db_service = current_injector.get(EllarSQLService)
-        res = db_service.session_factory.remove()
+class EllarSQLModule(ModuleBase, IModuleSetup):
+    @middleware()
+    async def session_middleware(
+        cls, context: IExecutionContext, call_next: t.Callable[..., t.Coroutine]
+    ):
+        connection = context.switch_to_http_connection().get_client()
 
+        db_session = connection.service_provider.get(EllarSQLService)
+        session = db_session.session_factory()
+
+        connection.state.session = session
+
+        try:
+            await call_next()
+        except Exception as ex:
+            res = session.rollback()
+            if isinstance(res, t.Coroutine):
+                await res
+            raise ex
+
+    @classmethod
+    async def _on_application_tear_down(cls, db_service: EllarSQLService) -> None:
+        res = db_service.session_factory.remove()
         if isinstance(res, t.Coroutine):
             await res
 
@@ -137,6 +155,10 @@ class EllarSQLModule(ModuleBase, IModuleSetup, IApplicationShutdown):
             )
 
         providers.append(ProviderConfig(EllarSQLService, use_value=db_service))
+        app_context_teardown_events.connect(
+            functools.partial(cls._on_application_tear_down, db_service=db_service)
+        )
+
         return DynamicModule(
             cls,
             providers=providers,
@@ -176,7 +198,7 @@ class EllarSQLModule(ModuleBase, IModuleSetup, IApplicationShutdown):
 
             schema.migration_options.directory = get_main_directory_by_stack(
                 schema.migration_options.directory,
-                stack_level=2,
+                stack_level=0,
                 from_dir=defined_config["root_path"],
             )
 
