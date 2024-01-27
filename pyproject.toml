@@ -48,8 +48,7 @@ doc = [
     "markdown-include",
     "mkdocstrings",
     "mkdocs-minify-plugin",
-    "mkdocs-git-revision-date-localized-plugin",
-    "factory-boy >= 3.3.0"
+    "mkdocs-git-revision-date-localized-plugin"
 ]
 
 [project.urls]
@@ -68,8 +67,8 @@ test = [
     "ruff ==0.1.9",
     "mypy == 1.8.0",
     "autoflake",
-    "types-Pillow",
     "ellar-cli >= 0.3.3",
+    "factory-boy >= 3.3.0"
 ]
 
 [tool.ruff]
