@@ -31,7 +31,7 @@ def test_model_creation():
 
 def test_create_model_with_another_base():
     class AnotherBaseWithSameMetadata(model.Model):
-        __base_config__ = ModelBaseConfig(make_declarative_base=True)
+        __base_config__ = ModelBaseConfig(as_base=True)
         name = model.Column(model.String(128))
 
     class T3(AnotherBaseWithSameMetadata):
@@ -59,7 +59,7 @@ def test_create_model_with_another_base():
 
 def test_metadata():
     class Base2(model.Model):
-        __base_config__ = ModelBaseConfig(make_declarative_base=True)
+        __base_config__ = ModelBaseConfig(as_base=True)
         metadata = model.MetaData()
         __database__ = "db2"
         name = model.Column(model.String(128))
@@ -68,7 +68,7 @@ def test_metadata():
 
     class Base3(model.Model):
         __base_config__ = ModelBaseConfig(
-            use_bases=[model.DeclarativeBase], make_declarative_base=True
+            use_bases=[model.DeclarativeBase], as_base=True
         )
         __database__ = "db2"
         name = model.Column(model.String(128))
@@ -146,7 +146,7 @@ def test_abstractmodel_case_1(db_service, base_super_class_as_dataclass):
     bases, _ = base_super_class_as_dataclass
 
     class Base(model.Model):
-        __base_config__ = ModelBaseConfig(use_bases=bases, make_declarative_base=True)
+        __base_config__ = ModelBaseConfig(use_bases=bases, as_base=True)
 
     class TimestampModel(Base):
         __abstract__ = True
@@ -184,7 +184,7 @@ def test_abstractmodel_case_2(db_service, base_super_class):
 
     # @model.as_base()
     class Base(model.Model):
-        __base_config__ = ModelBaseConfig(use_bases=bases, make_declarative_base=True)
+        __base_config__ = ModelBaseConfig(use_bases=bases, as_base=True)
 
     class TimestampModel(Base):  # type: ignore[no-redef]
         __abstract__ = True
@@ -245,7 +245,7 @@ def test_mixin_model_with_model_base(db_service, ignore_base):
         )
 
     class Base(TimestampMixin, model.Model):
-        __base_config__ = ModelBaseConfig(make_declarative_base=True)
+        __base_config__ = ModelBaseConfig(as_base=True)
 
     class Post(Base):  # type: ignore[no-redef]
         id: model.Mapped[int] = model.mapped_column(model.Integer, primary_key=True)
@@ -268,7 +268,7 @@ def test_mixin_model_case_2(db_service, base_super_class_as_dataclass) -> None:
     bases, meta = base_super_class_as_dataclass
 
     class Base(model.Model):
-        __base_config__ = ModelBaseConfig(use_bases=bases, make_declarative_base=True)
+        __base_config__ = ModelBaseConfig(use_bases=bases, as_base=True)
 
     class TimestampMixin(model.MappedAsDataclass):
         created: model.Mapped[datetime] = model.mapped_column(

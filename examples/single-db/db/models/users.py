@@ -1,7 +1,8 @@
-
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+
 from .base import Base
+
 
 class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -9,10 +10,4 @@ class User(Base):
     email: Mapped[str] = mapped_column(String)
 
 
-
-assert getattr(User, '__dnd__', None) == 'Ellar'
-
 # assert session
-
-
-

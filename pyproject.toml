@@ -34,9 +34,7 @@ classifiers = [
 dependencies = [
     "ellar >= 0.6.7",
     "sqlalchemy >= 2.0.23",
-    "alembic >= 1.10.0",
-    "python-magic >= 0.4.27",
-    "pillow >= 10.1.0"
+    "alembic >= 1.10.0"
 ]
 
 dev = [
@@ -69,8 +67,8 @@ test = [
     "ruff ==0.1.9",
     "mypy == 1.8.0",
     "autoflake",
-    "types-Pillow",
     "ellar-cli >= 0.3.3",
+    "factory-boy >= 3.3.0"
 ]
 
 [tool.ruff]
@@ -102,6 +100,7 @@ pretty = true
 strict_optional = true
 disable_error_code = ["name-defined", 'union-attr']
 disallow_subclassing_any = false
+ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "ellar_sql.cli.commands"
 ignore_errors = true

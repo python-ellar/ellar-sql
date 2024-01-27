@@ -24,7 +24,7 @@ class UserSerializer(ecm.Serializer):
 def _get_route_test_route(
     user_model, pagination_class, case_2=False, case_3=False, invalid=False, **kw
 ):
-    kwargs = dict(kw, template_context=True, pagination_class=pagination_class)
+    kwargs = dict(kw, as_template_context=True, pagination_class=pagination_class)
     if case_2:
         kwargs.update(model=user_model)
 

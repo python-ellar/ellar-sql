@@ -4,7 +4,7 @@ from ..utils import clean_directory, run_command, set_env_variable
 @clean_directory("multiple")
 def test_migrate_upgrade_for_multiple_database():
     with set_env_variable("multiple_db", "true"):
-        result = run_command("multiple_database.py db init")
+        result = run_command("multiple_database.py db init -m")
         assert result.returncode == 0
         assert (
             b"tests/dumbs/multiple/migrations/alembic.ini' before proceeding."
@@ -38,7 +38,7 @@ def test_migrate_upgrade_for_multiple_database():
 @clean_directory("multiple")
 def test_migrate_upgrade_multiple_database_with_model_changes():
     with set_env_variable("multiple_db", "true"):
-        result = run_command("multiple_database.py db init")
+        result = run_command("multiple_database.py db init -m")
         assert result.returncode == 0
 
         result = run_command("multiple_database.py db migrate")
@@ -59,7 +59,7 @@ def test_migrate_upgrade_multiple_database_with_model_changes():
 @clean_directory("multiple_async")
 def test_migrate_upgrade_for_multiple_database_async():
     with set_env_variable("multiple_db", "true"):
-        result = run_command("multiple_database_async.py db init")
+        result = run_command("multiple_database_async.py db init -m")
         assert result.returncode == 0
         assert (
             b"tests/dumbs/multiple_async/migrations/alembic.ini' before proceeding."

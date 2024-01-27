@@ -1,41 +1,25 @@
 import re
-import typing as t
-from io import BytesIO
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
 
 from ellar_sql.constant import DATABASE_BIND_KEY, DEFAULT_KEY, NAMING_CONVERSION
 
-from .database_binds import get_database_bind, has_database_bind, update_database_binds
-
-KB = 1024
-MB = 1024 * KB
-
-
-def copy_stream(source: t.IO, target: t.IO, *, chunk_size: int = 16 * KB) -> int:  # type:ignore[type-arg]
-    length = 0
-    while 1:
-        buf = source.read(chunk_size)
-        if not buf:
-            break
-        length += len(buf)
-        target.write(buf)
-    return length
+from .database_binds import (
+    DatabaseMetadata,
+    get_metadata,
+    has_metadata,
+    update_database_metadata,
+)
 
 
-def get_length(source: t.IO) -> int:  # type:ignore[type-arg]
-    buffer = BytesIO()
-    return copy_stream(source, buffer)
-
-
-def make_metadata(database_key: str) -> sa.MetaData:
-    if has_database_bind(database_key):
-        return get_database_bind(database_key, certain=True)
+def make_metadata(database_key: str) -> DatabaseMetadata:
+    if has_metadata(database_key):
+        return get_metadata(database_key, certain=True)
 
     if database_key != DEFAULT_KEY:
         # Copy the naming convention from the default metadata.
-        naming_convention = make_metadata(DEFAULT_KEY).naming_convention
+        naming_convention = make_metadata(DEFAULT_KEY).metadata.naming_convention
     else:
         naming_convention = NAMING_CONVERSION
 
@@ -43,8 +27,10 @@ def make_metadata(database_key: str) -> sa.MetaData:
     metadata = sa.MetaData(
         naming_convention=naming_convention, info={DATABASE_BIND_KEY: database_key}
     )
-    update_database_binds(database_key, metadata)
-    return metadata
+    update_database_metadata(
+        database_key, metadata, registry=sa_orm.registry(metadata=metadata)
+    )
+    return get_metadata(database_key, certain=True)
 
 
 def camel_to_snake_case(name: str) -> str:

@@ -9,6 +9,7 @@ clean: ## Removing cached python compiled files
 	find . -name \*pyo | xargs  rm -fv
 	find . -name \*~  | xargs  rm -fv
 	find . -name __pycache__  | xargs  rm -rfv
+	find . -name .pytest_cache  | xargs  rm -rfv
 	find . -name .ruff_cache  | xargs  rm -rfv
 
 install: ## Install dependencies
@@ -23,14 +24,14 @@ lint:fmt ## Run code linters
 	mypy ellar_sql
 
 fmt format:clean ## Run code formatters
-	ruff format ellar_sql tests
-	ruff check --fix ellar_sql tests
+	ruff format ellar_sql tests examples
+	ruff check --fix ellar_sql tests examples
 
-test: ## Run tests
-	pytest tests
+test:clean ## Run tests
+	pytest
 
-test-cov: ## Run tests with coverage
-	pytest --cov=ellar_sql --cov-report term-missing tests
+test-cov:clean ## Run tests with coverage
+	pytest --cov=ellar_sql --cov-report term-missing
 
 pre-commit-lint: ## Runs Requires commands during pre-commit
 	make clean

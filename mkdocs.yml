@@ -1,0 +1,103 @@
+site_name: ''
+site_description: Ellar-SQLAlchemy, designed for Ellar, enhances your application by integrating support for SQLAlchemy and Alembic.
+site_url: https://github.com/python-ellar/ellar-sql
+repo_name: python-ellar/ellar-sql
+repo_url: https://github.com/python-ellar/ellar-sql
+edit_uri: blob/master/docs
+copyright: |
+  Copyright &copy; 2024 <a href="https://github.com/eadwinCode"  target="_blank" rel="noopener">Eadwin Ezeudoh</a>
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tooltips
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.prune
+#    - navigation.tabs
+    - navigation.left
+    - navigation.tracking
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: cyan
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: cyan
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
+  font:
+    text: Source Sans Pro
+    code: Fira Code
+  language: en
+  logo: img/EllarLogoB.png
+  favicon: img/Icon.svg
+  icon:
+    repo: fontawesome/brands/git-alt
+
+plugins:
+  - search:
+        separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - minify:
+        minify_html: true
+  - git-revision-date-localized:
+      enable_creation_date: false
+
+nav:
+  - Index: index.md
+  - Get Started: models/index.md
+  - Configuration: models/configuration.md
+  - Models:
+      - index: models/models.md
+      - Extra Fields: models/extra-fields.md
+  - Pagination: pagination/index.md
+  - Multiple Database: multiple/index.md
+  - Migrations:
+      - index: migrations/index.md
+      - customizing env: migrations/env.md
+  - Testing:
+      - index: testing/index.md
+
+markdown_extensions:
+  - attr_list
+  - toc:
+      permalink: true
+  - admonition
+  - def_list
+  - tables
+  - abbr
+  - footnotes
+  - md_in_html
+  - codehilite
+  - pymdownx.superfences:
+      custom_fences:
+      - name: mermaid
+        class: mermaid
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.saneheaders
+  - pymdownx.tilde
+
+extra_css:
+  - stylesheets/extra.css

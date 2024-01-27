@@ -1,18 +1,16 @@
-"""Ellar SQLAlchemy Module - Adds support for SQLAlchemy and Alembic package to your Ellar web Framework"""
+"""EllarSQL Module adds support for SQLAlchemy and Alembic package to your Ellar application"""
 
 __version__ = "0.0.1"
 
+from .model.database_binds import get_all_metadata, get_metadata
 from .module import EllarSQLModule
 from .pagination import LimitOffsetPagination, PageNumberPagination, paginate
 from .query import (
     first_or_404,
-    first_or_404_async,
     get_or_404,
-    get_or_404_async,
     one_or_404,
-    one_or_404_async,
 )
-from .schemas import MigrationOption, SQLAlchemyConfig
+from .schemas import MigrationOption, ModelBaseConfig, SQLAlchemyConfig
 from .services import EllarSQLService
 
 __all__ = [
@@ -20,13 +18,13 @@ __all__ = [
     "EllarSQLService",
     "SQLAlchemyConfig",
     "MigrationOption",
-    "get_or_404_async",
     "get_or_404",
-    "first_or_404_async",
     "first_or_404",
-    "one_or_404_async",
     "one_or_404",
     "paginate",
     "PageNumberPagination",
     "LimitOffsetPagination",
+    "ModelBaseConfig",
+    "get_metadata",
+    "get_all_metadata",
 ]

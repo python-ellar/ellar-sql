@@ -8,11 +8,11 @@ export ELLAR_CONFIG_MODULE=ellar_sqlachemy_example.config:DevelopmentConfig
 
 import typing as t
 
-from ellar.pydantic import ENCODERS_BY_TYPE as encoders_by_type
-from starlette.middleware import Middleware
 from ellar.common import IExceptionHandler, JSONResponse
 from ellar.core import ConfigDefaultTypesMixin
 from ellar.core.versioning import BaseAPIVersioning, DefaultAPIVersioning
+from ellar.pydantic import ENCODERS_BY_TYPE as encoders_by_type
+from starlette.middleware import Middleware
 
 
 class BaseConfig(ConfigDefaultTypesMixin):
@@ -56,7 +56,7 @@ class BaseConfig(ConfigDefaultTypesMixin):
     # A dictionary mapping either integer status codes,
     # or exception class types onto callables which handle the exceptions.
     # Exception handler callables should be of the form
-    # `handler(context:IExecutionContext, exc: Exception) -> response` 
+    # `handler(context:IExecutionContext, exc: Exception) -> response`
     # and may be either standard functions, or async functions.
     EXCEPTION_HANDLERS: t.List[IExceptionHandler] = []
 
@@ -69,14 +69,14 @@ class BaseConfig(ConfigDefaultTypesMixin):
 class DevelopmentConfig(BaseConfig):
     DEBUG: bool = True
     # Configuration through Confog
-    SQLALCHEMY_CONFIG: t.Dict[str, t.Any] = {
-        'databases': {
-            'default': 'sqlite:///project.db',
+    ELLAR_SQL: t.Dict[str, t.Any] = {
+        "databases": {
+            "default": "sqlite:///project.db",
             # 'db2': 'sqlite+aiosqlite:///project2.db',
         },
-        'echo': True,
-        'migration_options': {
-            'directory': 'migrations' # root directory will be determined based on where the module is instantiated.
+        "echo": True,
+        "migration_options": {
+            "directory": "migrations"  # root directory will be determined based on where the module is instantiated.
         },
-        'models': ['db.models']
+        "models": ["db.models"],
     }

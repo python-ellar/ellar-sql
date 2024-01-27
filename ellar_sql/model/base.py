@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ellar_sql.constant import DATABASE_BIND_KEY, DATABASE_KEY, DEFAULT_KEY
 from ellar_sql.schemas import ModelBaseConfig
 
-from .database_binds import get_database_bind, has_database_bind, update_database_binds
+from .database_binds import get_metadata, has_metadata, update_database_metadata
 from .mixins import (
     DatabaseBindKeyMixin,
     ModelDataExportMixin,
@@ -23,10 +23,12 @@ def _update_metadata(namespace: t.Dict[str, t.Any]) -> None:
     metadata = namespace.get("metadata", None)
 
     if metadata and database_key:
-        if not has_database_bind(database_key):
+        if not has_metadata(database_key):
             # verify the key exist and store the metadata
             metadata.info[DATABASE_BIND_KEY] = database_key
-            update_database_binds(database_key, metadata)
+            update_database_metadata(
+                database_key, metadata, sa_orm.registry(metadata=metadata)
+            )
         # if we have saved metadata then, its save to remove it and allow
         # DatabaseBindKeyMixin to set it back when the class if fully created.
         namespace.pop("metadata")
@@ -56,9 +58,7 @@ class ModelMeta(type):
 
         options = namespace.pop(
             "__base_config__",
-            ModelBaseConfig(
-                make_declarative_base=False, use_bases=[sa_orm.DeclarativeBase]
-            ),
+            ModelBaseConfig(as_base=False, use_bases=[sa_orm.DeclarativeBase]),
         )
         if isinstance(options, dict):
             options = ModelBaseConfig(**options)
@@ -66,7 +66,7 @@ class ModelMeta(type):
             options, ModelBaseConfig
         ), f"{options.__class__} is not a support ModelMetaOptions"
 
-        if options.make_declarative_base:
+        if options.as_base:
             declarative_bases = _get_declarative_bases(options.use_bases)
             working_base = list(bases)
 
@@ -109,29 +109,30 @@ class ModelMeta(type):
                 lambda ns: ns.update(namespace),
             )
 
-            if not has_database_bind(DEFAULT_KEY):
+            # model = t.cast(t.Type[sa_orm.DeclarativeBase], model)
+
+            if not has_metadata(DEFAULT_KEY):
                 # Use the model's metadata as the default metadata.
                 model.metadata.info[DATABASE_BIND_KEY] = DEFAULT_KEY
-                update_database_binds(DEFAULT_KEY, model.metadata)
-            elif not has_database_bind(model.metadata.info.get(DATABASE_BIND_KEY)):
+                update_database_metadata(DEFAULT_KEY, model.metadata, model.registry)
+            elif not has_metadata(model.metadata.info.get(DATABASE_BIND_KEY)):
                 # Use the passed in default metadata as the model's metadata.
-                model.metadata = get_database_bind(DEFAULT_KEY, certain=True)
+                model.metadata = get_metadata(DEFAULT_KEY, certain=True)
 
             return model
 
         # _update_metadata(namespace)
+        __base_config__ = ModelBaseConfig(use_bases=options.use_bases, as_base=True)
 
         base = ModelMeta(
             "ModelBase",
             bases,
-            {
-                "__base_config__": ModelBaseConfig(
-                    use_bases=options.use_bases, make_declarative_base=True
-                )
-            },
+            {"__base_config__": __base_config__},
         )
 
-        return types.new_class(name, (base,), {}, lambda ns: ns.update(namespace))
+        return types.new_class(
+            name, (base,), {"options": options}, lambda ns: ns.update(namespace)
+        )
 
 
 class ModelBase(ModelDataExportMixin):
@@ -157,9 +158,6 @@ class ModelBase(ModelDataExportMixin):
         __table_args__: t.Any
 
         def __init__(self, **kwargs: t.Any) -> None:
-            ...
-
-        def dict(self, exclude: t.Optional[t.Set[str]] = None) -> t.Dict[str, t.Any]:
             ...
 
         def _sa_inspect_type(self) -> sa.Mapper["ModelBase"]:

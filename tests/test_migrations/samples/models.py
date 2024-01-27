@@ -4,7 +4,7 @@ from ellar_sql import model
 
 
 class Base(model.Model):
-    __base_config__ = {"make_declarative_base": True}
+    __base_config__ = {"as_base": True}
 
 
 class User(Base):

@@ -75,7 +75,12 @@ class CLICommandHandlers:
         return config
 
     @_catch_errors
-    def alembic_init(self, directory: str | None = None, package: bool = False) -> None:
+    def alembic_init(
+        self,
+        directory: str | None = None,
+        multiple: bool = False,
+        package: bool = False,
+    ) -> None:
         """Creates a new migration repository"""
         if directory is None:
             directory = self.db_service.migration_options.directory
@@ -84,7 +89,12 @@ class CLICommandHandlers:
         config.set_main_option("script_location", directory)
         config.config_file_name = os.path.join(directory, "alembic.ini")
 
-        command.init(config, directory, template="basic", package=package)
+        template_name = "single"
+
+        if multiple:
+            template_name = "multiple"
+
+        command.init(config, directory, template=template_name, package=package)
 
     @_catch_errors
     def revision(
