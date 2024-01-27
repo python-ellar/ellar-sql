@@ -65,18 +65,17 @@ plugins:
 
 nav:
   - Index: index.md
-  - Get Started: models/index.md
-  - Configuration: models/configuration.md
+  - Get Started: overview/index.md
+  - Configuration: overview/configuration.md
   - Models:
-      - index: models/models.md
+      - index: models/index.md
       - Extra Fields: models/extra-fields.md
   - Pagination: pagination/index.md
   - Multiple Database: multiple/index.md
   - Migrations:
       - index: migrations/index.md
       - customizing env: migrations/env.md
-  - Testing:
-      - index: testing/index.md
+  - Testing: testing/index.md
 
 markdown_extensions:
   - attr_list

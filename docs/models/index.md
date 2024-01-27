@@ -1,153 +1,330 @@
-# **Quick Start**
-In this segment, we will walk through the process of configuring **EllarSQL** within your Ellar application, 
-ensuring that all essential services are registered, configurations are set, and everything is prepared for immediate use.
+# **Models and Tables**
+The `ellar_sql.model.Model` class acts as a factory for creating `SQLAlchemy` models, and 
+associating the generated models with the corresponding **Metadata** through their designated **`__database__`** key.
 
-Before we delve into the setup instructions, it is assumed that you possess a comprehensive 
-understanding of how [Ellar Modules](https://python-ellar.github.io/ellar/basics/dynamic-modules/#module-dynamic-setup){target="_blank"} 
-operate.
 
-## **Installation**
-Let us install all the required packages, assuming that your Python environment has been properly configured:
+This class can be configured through the `__base_config__` attribute, allowing you to specify how your `SQLAlchemy` model should be created. 
+The `__base_config__` attribute can be of type `ModelBaseConfig`, which is a dataclass, or a dictionary with keys that 
+match the attributes of `ModelBaseConfig`.
 
-#### **For Existing Project:**
-```shell
-pip install ellar-sql
+Attributes of `ModelBaseConfig`:
+
+- **as_base**: Indicates whether the class should be treated as a `Base` class for other model definitions, similar to creating a Base from a [DeclarativeBase](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBase){target="_blank"} or [DeclarativeBaseNoMeta](https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.DeclarativeBaseNoMeta){target="_blank"} class. *(Default: False)*
+- **use_base**: Specifies the base classes that will be used to create the `SQLAlchemy` model. *(Default: [])*
+
+## **Creating a Base Class**
+`Model` treats each model as a standalone entity. Each instance of `model.Model` creates a distinct **declarative** base for itself, using the `__database__` key as a reference to determine its associated **Metadata**. Consequently, models sharing the same `__database__` key will utilize the same **Metadata** object.
+
+Let's explore how we can create a `Base` model using `Model`, similar to the approach in traditional `SQLAlchemy`.
+
+```python
+from ellar_sql import model, ModelBaseConfig
+
+
+class Base(model.Model):
+    __base_config__ = ModelBaseConfig(as_base=True, use_bases=[model.DeclarativeBase])
+
+    
+assert issubclass(Base, model.DeclarativeBase)
 ```
 
-#### **For New Project**:
-```shell
-pip install ellar ellar-cli ellar-sql
+If you are interested in [SQLAlchemy’s native support for data classes](https://docs.sqlalchemy.org/en/20/changelog/whatsnew_20.html#native-support-for-dataclasses-mapped-as-orm-models){target="_blank"}, 
+then you can add `MappedAsDataclass` to `use_bases` as shown below:
+
+```python
+from ellar_sql import model, ModelBaseConfig
+
+
+class Base(model.Model):
+    __base_config__ = ModelBaseConfig(as_base=True, use_bases=[model.DeclarativeBase, model.MappedAsDataclass])
+
+assert issubclass(Base, model.MappedAsDataclass)
 ```
 
-After a successful package installation, we need to scaffold a new project using `ellar` cli tool
-```shell
-ellar new db-learning
-```
-This will scaffold `db-learning` project with necessary file structure shown below.
-```
-path/to/db-learning/
-├─ db_learning/
-│  ├─ apps/
-│  │  ├─ __init__.py
-│  ├─ core/
-│  ├─ config.py
-│  ├─ domain
-│  ├─ root_module.py
-│  ├─ server.py
-│  ├─ __init__.py
-├─ tests/
-│  ├─ __init__.py
-├─ pyproject.toml
-├─ README.md
-```
-Next, in `db_learning/` directory, we need to create a `models.py`. It will hold all our SQLAlchemy ORM Models for now.
+In the examples above, `Base` classes are created, all subclassed from the `use_bases` provided, and with the `as_base` 
+option, the factory creates the `Base` class as a `Base`.
 
-## **Creating a Model**
-In `models.py`, we use `ellar_sql.model.Model` to create our SQLAlchemy ORM Models.
+## Create base with MetaData
+You can also configure the SQLAlchemy object with a custom [`MetaData`](https://docs.sqlalchemy.org/en/20/core/metadata.html#sqlalchemy.schema.MetaData){target="_blank"} object. 
+For instance, you can define a specific **naming convention** for constraints, ensuring consistency and predictability in constraint names. 
+This can be particularly beneficial during migrations, as detailed by [Alembic](https://alembic.sqlalchemy.org/en/latest/naming.html){target="_blank"}.
 
-```python title="db_learning/model.py"
+For example:
+
+```python
+from ellar_sql import model, ModelBaseConfig
+
+class Base(model.Model):
+    __base_config__ = ModelBaseConfig(as_base=True, use_bases=[model.DeclarativeBase])
+    
+    metadata = model.MetaData(naming_convention={
+        "ix": 'ix_%(column_0_label)s',
+        "uq": "uq_%(table_name)s_%(column_0_name)s",
+        "ck": "ck_%(table_name)s_%(constraint_name)s",
+        "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+        "pk": "pk_%(table_name)s"
+    })
+```
+
+## **Abstract Models and Mixins**
+If the desired behavior is only applicable to specific models rather than all models, 
+you can use an abstract model base class to customize only those models. 
+For example, if certain models need to track their creation or update **timestamps**, t
+his approach allows for targeted customization.
+
+```python
+from datetime import datetime, timezone
+from ellar_sql import model
+from sqlalchemy.orm import Mapped, mapped_column
+
+class TimestampModel(model.Model):
+    __abstract__ = True
+    created: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    updated: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    
+class BookAuthor(model.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
+
+    
+class Book(TimestampModel):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+```
+
+This can also be done with a mixin class, inherited separately.
+```python
+from datetime import datetime, timezone
+from ellar_sql import model
+from sqlalchemy.orm import Mapped, mapped_column
+
+class TimestampModel:
+    created: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    updated: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    
+class Book(model.Model, TimestampModel):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+```
+
+## **Defining Models**
+Unlike plain SQLAlchemy, **EllarSQL** models will automatically generate a table name if the `__tablename__` attribute is not set, 
+provided a primary key column is defined.
+
+```python
 from ellar_sql import model
 
 
 class User(model.Model):
-    id: model.Mapped[int] = model.mapped_column(model.Integer, primary_key=True)
-    username: model.Mapped[str] = model.mapped_column(model.String, unique=True, nullable=False)
-    email: model.Mapped[str] = model.mapped_column(model.String)
-```
+    id: model.Mapped[int] = model.mapped_column(primary_key=True)
+    username: model.Mapped[str] = model.mapped_column(unique=True)
+    email: model.Mapped[str]
 
-!!!info
-    `ellar_sql.model` also exposes `sqlalchemy`, `sqlalchemy.orm` and `sqlalchemy.event` imports just for ease of import reference
-
-## **Create A UserController**
-Let's create a controller that exposes our user data.
-
-```python title="db_learning/controller.py"
-import ellar.common as ecm
-from ellar.pydantic import EmailStr
-from ellar_sql import model, get_or_404
-from .models import User
-
-
-@ecm.Controller
-class UsersController(ecm.ControllerBase):
-    @ecm.post("/users")
-    def create_user(self, username: ecm.Body[str], email: ecm.Body[EmailStr], session: ecm.Inject[model.Session]):
-        user = User(username=username, email=email)
-
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-        
-        return user.dict()
-
-    @ecm.get("/users/{user_id:int}")
-    def user_by_id(self, user_id: int):
-        user = get_or_404(User, user_id)
-        return user.dict()
-
-    @ecm.get("/")
-    async def user_list(self, session: ecm.Inject[model.Session]):
-        stmt = model.select(User)
-        rows = session.execute(stmt.offset(0).limit(100)).scalars()
-        return [row.dict() for row in rows]
     
-    @ecm.get("/{user_id:int}")
-    async def user_delete(self, user_id: int, session: ecm.Inject[model.Session]):
-        user = get_or_404(User, user_id)
-        session.delete(user)
-        return {'detail': f'User id={user_id} Deleted successfully'}
+class UserAddress(model.Model):
+    __tablename__ = 'user-address'
+    id: model.Mapped[int] = model.mapped_column(primary_key=True)
+    address: model.Mapped[str] = model.mapped_column(unique=True)
+
+assert User.__tablename__ == 'user'
+assert UserAddress.__tablename__ == 'user-address'
 ```
+For a comprehensive guide on defining model classes declaratively, refer to 
+[SQLAlchemy’s declarative documentation](https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html){target="_blank"}. 
+This resource provides detailed information and insights into the declarative approach for defining model classes.
 
-## **EllarSQLModule Setup**
-In the `root_module.py` file, two main tasks need to be performed:
+## **Defining Tables**
+The table class is designed to receive a table name, followed by **columns** and other table **components** such as constraints.
 
-1. Register the `UsersController` to make the `/users` endpoint available when starting the application.
-2. Configure the `EllarSQLModule`, which will set up and register essential services such as `EllarSQLService`, `Session`, and `Engine`.
+EllarSQL enhances the functionality of the SQLAlchemy Table 
+by facilitating the selection of **Metadata** based on the `__database__` argument.
 
-```python title="db_learning/root_module.py"
-from ellar.common import Module, exception_handler, IExecutionContext, JSONResponse, Response, IApplicationStartup
-from ellar.app import App
-from ellar.core import ModuleBase
-from ellar_sql import EllarSQLModule, EllarSQLService
-from .controller import UsersController
+Directly creating a table proves particularly valuable when establishing **many-to-many** relationships. 
+In such cases, the association table doesn't need its dedicated model class; rather, it can be conveniently accessed 
+through the relevant relationship attributes on the associated models.
 
-@Module(
-    modules=[EllarSQLModule.setup(
-        databases={
-            'default': {
-                'url': 'sqlite:///app.db',
-                'echo': True
-            }
-        },
-        migration_options={'directory': 'migrations'}
-    )],
-    controllers=[UsersController]
+```python
+from ellar_sql import model
+
+author_book_m2m = model.Table(
+    "author_book",
+    model.Column("book_author_id", model.ForeignKey(BookAuthor.id), primary_key=True),
+    model.Column("book_id", model.ForeignKey(Book.id), primary_key=True),
 )
-class ApplicationModule(ModuleBase, IApplicationStartup):
-    async def on_startup(self, app: App) -> None:
-        db_service = app.injector.get(EllarSQLService)
-        db_service.create_all()
+```
+
+## **Quick Tutorial**
+In this section, we'll delve into straightforward **CRUD** operations using the ORM objects. 
+However, if you're not well-acquainted with SQLAlchemy,
+feel free to explore their tutorial 
+on [ORM](https://docs.sqlalchemy.org/tutorial/orm_data_manipulation.html){target="_blank"}
+for a more comprehensive understanding.
+
+Having understood, `Model` usage. Let's create a `User` model
+
+```python
+from ellar_sql import model
+
+
+class User(model.Model):
+    id: model.Mapped[int] = model.mapped_column(primary_key=True)
+    username: model.Mapped[str] = model.mapped_column(unique=True)
+    full_name: model.Mapped[str] = model.mapped_column(model.String)
+```
+We have created a `User` model but the data does not exist. Let's fix that
+
+```python
+from ellar.app import current_injector
+from ellar_sql import EllarSQLService
+
+db_service = current_injector.get(EllarSQLService)
+db_service.create_all()
+```
+
+### **Insert**
+To insert data, you need a session. Here's an example using EllarSQL to insert a user:
+
+```python
+import ellar.common as ecm
+from .model import User
+
+@ecm.post('/create')
+def create_user():
+    session = User.get_db_session()
+    squidward = User(name="squidward", fullname="Squidward Tentacles")
+    session.add(squidward)
+
+    session.commit()
     
-    @exception_handler(404)
-    def exception_404_handler(cls, ctx: IExecutionContext, exc: Exception) -> Response:
-        return JSONResponse(dict(detail="Resource not found."), status_code=404)
+    return squidward.dict(exclude={'id'})
 ```
 
-In the provided code snippet:
+In the above illustration, the `squidward` data is converted to a `dictionary` object by calling `.dict()` 
+and excluding the `id` field. The `User.get_db_session()` function is used to get the session 
+for the registered `EllarSQLService.session_factory`. The function depends on `ApplicationContext`.
 
-- We registered `UserController` and `EllarSQLModule` with specific configurations for the database and migration options. For more details on [`EllarSQLModule` configurations](./configuration.md#ellarsqlmodule-config).
 
-- In the `on_startup` method, we obtained the `EllarSQLService` from the Ellar Dependency Injection container using `EllarSQLModule`. Subsequently, we invoked the `create_all()` method to generate the necessary SQLAlchemy tables.
+### **Update**
+To update, make changes to the ORM object and commit. Here's an example using EllarSQL to update a user:
 
-With these configurations, the application is now ready for testing.
-```shell
-ellar runserver --reload
+```python
+import ellar.common as ecm
+import sqlalchemy.orm as sa_orm
+from .model import User
+
+@ecm.put('/update')
+def update_user(session: ecm.Inject[sa_orm.Session]):
+    squidward = session.get(User, 1)
+    
+    squidward.fullname = 'EllarSQL'
+    session.commit()
+    
+    return squidward.dict()
 ```
-Additionally, please remember to uncomment the configurations for the `OpenAPIModule` in the `server.py` 
-file to enable visualization and interaction with the `/users` endpoint.
 
-Once done, 
-you can access the OpenAPI documentation at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs){target="_blank"}.
+In the above illustration, `Inject[sa_orm.Session]` is used to inject the `session` into the `update_user` route handler. 
+This is another way to get the `session` through the `EllarSQLService` service. The changes made to the `squidward` 
+object are committed to the database using `session.commit()`.
 
-You can find the source code for this project 
-[here](https://github.com/python-ellar/ellar-sql/tree/master/examples/db-learning){target="_blank"}.
+### **Delete**
+To delete, pass the ORM object to `session.delete()`.
+```python
+import ellar.common as ecm
+import sqlalchemy.orm as sa_orm
+from .model import User
+
+
+@ecm.delete('/delete')
+def delete_user(session: ecm.Inject[sa_orm.Session]):
+    squidward = session.get(User, 1)
+    
+    session.delete(squidward)
+    session.commit()
+    
+    return ''
+
+```
+
+After modifying data, you must call `session.commit()` to commit the changes to the database.
+Otherwise, changes may not be persisted to the database.
+
+## **View Utilities**
+EllarSQL provides some utility query functions to check missing entities and raise 404 Not found if not found.
+
+- **get_or_404**: It will raise a 404 error if the row with the given id does not exist; otherwise, it will return the corresponding instance.
+- **first_or_404**: It will raise a 404 error if the query does not return any results; otherwise, it will return the first result.
+- **one_or_404**(): It will raise a 404 error if the query does not return exactly one result; otherwise, it will return the result.
+
+```python
+import ellar.common as ecm
+from ellar_sql import get_or_404, one_or_404, model
+
+@ecm.get("/user-by-id/{user_id:int}")
+def user_by_id(user_id: int):
+    user = get_or_404(User, user_id)
+    return user.dict()
+
+@ecm.get("/user-by-name/{name:str}")
+def user_by_username(name: str):
+    user = one_or_404(model.select(User).filter_by(name=name), error_message=f"No user named '{name}'.")
+    return user.dict()
+```
+
+## **Accessing Metadata and Engines**
+
+In the process of `EllarSQLModule` setup, three services are registered to the Ellar IoC container.
+
+- `EllarSQLService`: Which manages models, metadata, engines and sessions
+- `Engine`: SQLAlchemy Engine of the default database configuration
+- `Session`SQLAlchemy Session of the default database configuration
+
+Although with `EllarSQLService` you can get the `engine` and `session`. It's there for easy of access.
+
+```python
+import sqlalchemy as sa
+import sqlalchemy.orm as sa_orm
+from ellar.app import current_injector
+from ellar_sql import EllarSQLService
+
+db_service = current_injector.get(EllarSQLService)
+
+assert isinstance(db_service.engine, sa.Engine)
+assert isinstance(db_service.session_factory(), sa_orm.Session)
+```
+#### **Important Constraints**
+- EllarSQLModule `databases` options for `SQLAlchemy.ext.asyncio.AsyncEngine` will register `SQLAlchemy.ext.asyncio.AsyncEngine`
+  and `SQLAlchemy.ext.asyncio.AsyncSession`
+- EllarSQLModule `databases` options for `SQLAlchemy.Engine` will register `SQLAlchemy.Engine` and `SQLAlchemy.orm.Session`.
+- `EllarSQL.get_all_metadata()` retrieves all configured metadatas
+- `EllarSQL.get_metadata()` retrieves metadata by `__database__` key or `default` is no parameter is passed.
+
+```python
+import sqlalchemy as sa
+import sqlalchemy.orm as sa_orm
+from ellar.app import current_injector
+
+# get engine from DI
+default_engine = current_injector.get(sa.Engine)
+# get session from DI
+session = current_injector.get(sa_orm.Session)
+
+
+assert isinstance(default_engine, sa.Engine)
+assert isinstance(session, sa_orm.Session)
+```
+For Async Database options
+```python
+from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
+from ellar.app import current_injector
+
+# get engine from DI
+default_engine = current_injector.get(AsyncEngine)
+# get session from DI
+session = current_injector.get(AsyncSession)
+
+
+assert isinstance(default_engine, AsyncEngine)
+assert isinstance(session, AsyncSession)
+```
