@@ -15,7 +15,7 @@
 EllarSQL is an SQL database module, leveraging the robust capabilities of [SQLAlchemy](https://www.sqlalchemy.org/) to 
 seamlessly interact with SQL databases through Python code and objects.
 
-Engineered with precision, EllarSQL is meticulously designed to streamline the integration of **SQLAlchemy** within your 
+EllarSQL is meticulously designed to streamline the integration of **SQLAlchemy** within your 
 Ellar application. It introduces discerning usage patterns around pivotal objects 
 such as **model**, **session**, and **engine**, ensuring an efficient and coherent workflow.
 
