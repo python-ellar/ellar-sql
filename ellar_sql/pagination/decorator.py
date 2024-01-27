@@ -16,7 +16,7 @@ from .view import PageNumberPagination, PaginationBase
 
 def paginate(
     pagination_class: t.Optional[t.Type[PaginationBase]] = None,
-    model: t.Optional[t.Type[ModelBase]] = None,
+    model: t.Optional[t.Union[t.Type[ModelBase], sa.sql.Select[t.Any]]] = None,
     as_template_context: bool = False,
     item_schema: t.Optional[t.Type[BaseModel]] = None,
     **paginator_options: t.Any,

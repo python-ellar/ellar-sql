@@ -48,7 +48,8 @@ doc = [
     "markdown-include",
     "mkdocstrings",
     "mkdocs-minify-plugin",
-    "mkdocs-git-revision-date-localized-plugin"
+    "mkdocs-git-revision-date-localized-plugin",
+    "factory-boy >= 3.3.0"
 ]
 
 [project.urls]
@@ -100,6 +101,7 @@ pretty = true
 strict_optional = true
 disable_error_code = ["name-defined", 'union-attr']
 disallow_subclassing_any = false
+ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "ellar_sql.cli.commands"
 ignore_errors = true

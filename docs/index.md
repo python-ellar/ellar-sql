@@ -37,12 +37,10 @@ EllarSQL comes packed with a set of awesome features designed:
 ## **Requirements**
 EllarSQL core dependencies includes:
 
-- Python version >= 3.8
-- Ellar Framework >= 0.6.7
-- SQLAlchemy ORM >= 2.0.16
+- Python >= 3.8
+- Ellar >= 0.6.7
+- SQLAlchemy >= 2.0.16
 - Alembic >= 1.10.0
-- Pillow >= 10.1.0
-- Python-Magic >= 0.4.27
 
 ## **Installation**
 

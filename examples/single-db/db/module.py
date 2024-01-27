@@ -18,9 +18,10 @@ class MyModule(ModuleBase):
 
 """
 from ellar.app import App
-from ellar.common import Module, IApplicationStartup
+from ellar.common import IApplicationStartup, Module
 from ellar.core import ModuleBase
 from ellar.di import Container
+
 from ellar_sql import EllarSQLModule, EllarSQLService
 
 from .controllers import DbController
@@ -30,9 +31,7 @@ from .controllers import DbController
     controllers=[DbController],
     providers=[],
     routers=[],
-    modules=[
-        EllarSQLModule.register_setup()
-    ]
+    modules=[EllarSQLModule.register_setup()],
 )
 class DbModule(ModuleBase, IApplicationStartup):
     """
@@ -41,7 +40,7 @@ class DbModule(ModuleBase, IApplicationStartup):
 
     async def on_startup(self, app: App) -> None:
         db_service = app.injector.get(EllarSQLService)
-        # db_service.create_all()
+        db_service.create_all()
 
     def register_providers(self, container: Container) -> None:
-        """for more complicated provider registrations, use container.register_instance(...) """
+        """for more complicated provider registrations, use container.register_instance(...)"""

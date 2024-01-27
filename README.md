@@ -8,9 +8,6 @@
 [![PyPI version](https://img.shields.io/pypi/v/ellar-sql.svg)](https://pypi.python.org/pypi/ellar-sql)
 [![PyPI version](https://img.shields.io/pypi/pyversions/ellar-sql.svg)](https://pypi.python.org/pypi/ellar-sql)
 
-## Project Status
-- [x] Production Ready
-- [ ] SQLAlchemy Django Like Query
 
 ## Introduction
 EllarSQL Module adds support for `SQLAlchemy` and `Alembic` package to your Ellar application
