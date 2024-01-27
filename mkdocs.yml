@@ -1,5 +1,5 @@
 site_name: ''
-site_description: Ellar-SQLAlchemy, designed for Ellar, enhances your application by integrating support for SQLAlchemy and Alembic.
+site_description: EllarSQL, designed for Ellar, enhances your application by integrating support for SQLAlchemy and Alembic.
 site_url: https://github.com/python-ellar/ellar-sql
 repo_name: python-ellar/ellar-sql
 repo_url: https://github.com/python-ellar/ellar-sql
