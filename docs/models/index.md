@@ -148,3 +148,6 @@ file to enable visualization and interaction with the `/users` endpoint.
 
 Once done, 
 you can access the OpenAPI documentation at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs){target="_blank"}.
+
+You can find the source code for this project 
+[here](https://github.com/python-ellar/ellar-sql/tree/master/examples/db-learning){target="_blank"}.

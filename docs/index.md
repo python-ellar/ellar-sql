@@ -109,4 +109,8 @@ session.close()
 
 We have successfully seed `50` users to `User` table in `app.db`. 
 
+You can find the source code 
+for this example 
+[here](https://github.com/python-ellar/ellar-sql/blob/master/examples/index-script/main.py){target="_blank"}.
+
 I know at this point you want to know more, so let's dive deep into the documents and [get started](https://githut.com/python-ellar/ellar-sql/models/).
