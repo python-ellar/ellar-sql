@@ -100,10 +100,11 @@ class ModelDataExportMixin:
 
     def _calculate_keys(
         self,
+        data: t.Dict[str, t.Any],
         include: t.Optional[t.Set[str]],
         exclude: t.Optional[t.Set[str]],
     ) -> t.Set[str]:
-        keys: t.Set[str] = {k for k in self.__dict__.keys() if not k.startswith("_sa")}
+        keys: t.Set[str] = set(data.keys())
 
         if include is None and exclude is None:
             return keys
@@ -122,9 +123,14 @@ class ModelDataExportMixin:
         exclude: t.Optional[t.Set[str]],
         exclude_none: bool = False,
     ) -> t.Generator[t.Tuple[str, t.Any], None, None]:
-        allowed_keys = self._calculate_keys(include=include, exclude=exclude)
+        data = dict(self.__dict__)
 
-        for field_key, v in self.__dict__.items():
+        if len(data.keys()) != len(self.__mms__.columns):
+            data = {c.key: getattr(self, c.key, None) for c in self.__mms__.columns}
+
+        allowed_keys = self._calculate_keys(include=include, exclude=exclude, data=data)
+
+        for field_key, v in data.items():
             if (allowed_keys is not None and field_key not in allowed_keys) or (
                 exclude_none and v is None
             ):

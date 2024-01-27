@@ -1,5 +1,6 @@
 from datetime import datetime
-from sqlalchemy import DateTime, func, MetaData
+
+from sqlalchemy import DateTime, MetaData, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ellar_sql.model import Model
@@ -14,15 +15,19 @@ convention = {
 
 
 class Base(Model):
-  __base_config__ = {'as_base': True}
-  __database__ = 'default'
+    __base_config__ = {"as_base": True}
+    __database__ = "default"
 
-  metadata = MetaData(naming_convention=convention)
+    metadata = MetaData(naming_convention=convention)
 
-  created_date: Mapped[datetime] = mapped_column(
-      "created_date", DateTime, default=datetime.utcnow, nullable=False
-  )
+    created_date: Mapped[datetime] = mapped_column(
+        "created_date", DateTime, default=datetime.utcnow, nullable=False
+    )
 
-  time_updated: Mapped[datetime] = mapped_column(
-      "time_updated", DateTime, nullable=False, default=datetime.utcnow, onupdate=func.now()
-  )
+    time_updated: Mapped[datetime] = mapped_column(
+        "time_updated",
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=func.now(),
+    )

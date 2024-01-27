@@ -48,9 +48,9 @@ from .models import User
 
 
 class UserSchema(ec.Serializer):
-    id: str
-    name: str
-    fullname: str
+    id: int
+    username: str
+    email: str
 
 
 @ec.get('/users')

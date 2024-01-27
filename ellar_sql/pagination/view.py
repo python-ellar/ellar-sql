@@ -34,11 +34,13 @@ class PaginationBase(ABC):
         model: t.Union[t.Type[ModelBase], sa.sql.Select[t.Any]],
         fallback: t.Optional[t.Union[t.Type[ModelBase], sa.sql.Select[t.Any]]],
     ) -> t.Union[t.Type[ModelBase], sa.sql.Select[t.Any]]:
-        if isinstance(model, sa.sql.Select):
+        if isinstance(model, sa.sql.Select) or (
+            isinstance(model, type) and issubclass(model, ModelBase)
+        ):
             working_model = model
         else:
-            working_model = model or fallback  # type:ignore[assignment]
-            assert working_model, "Model Can not be None"
+            working_model = fallback  # type:ignore[assignment]
+            assert working_model is not None, "Model Can not be None"
         return working_model
 
     @abstractmethod

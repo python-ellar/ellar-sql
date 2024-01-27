@@ -9,7 +9,7 @@ class MyController(ControllerBase):
         return {'detail': "Welcome Dog's Resources"}
 """
 
-from ellar.common import Controller, ControllerBase, get, post, Body
+from ellar.common import Body, Controller, ControllerBase, get, post
 from pydantic import EmailStr
 from sqlalchemy import select
 
@@ -18,7 +18,6 @@ from .models.users import User
 
 @Controller
 class DbController(ControllerBase):
-
     @get("/")
     def index(self):
         return {"detail": "Welcome Db Resource"}
@@ -46,4 +45,3 @@ class DbController(ControllerBase):
         stmt = select(User)
         rows = session.execute(stmt.offset(0).limit(100)).scalars()
         return [row.dict() for row in rows]
-
