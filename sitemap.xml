@@ -26,22 +26,22 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://github.com/python-ellar/ellar-sql/models/configuration/</loc>
-         <lastmod>2024-01-27</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://github.com/python-ellar/ellar-sql/models/extra-fields/</loc>
          <lastmod>2024-01-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://github.com/python-ellar/ellar-sql/models/models/</loc>
+         <loc>https://github.com/python-ellar/ellar-sql/multiple/</loc>
          <lastmod>2024-01-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://github.com/python-ellar/ellar-sql/multiple/</loc>
+         <loc>https://github.com/python-ellar/ellar-sql/overview/</loc>
+         <lastmod>2024-01-27</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://github.com/python-ellar/ellar-sql/overview/configuration/</loc>
          <lastmod>2024-01-27</lastmod>
          <changefreq>daily</changefreq>
     </url>
