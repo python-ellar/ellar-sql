@@ -64,7 +64,7 @@ test = [
     "pytest-asyncio",
     "aiosqlite",
     "anyio[trio] >= 3.2.1",
-    "ruff ==0.1.9",
+    "ruff ==0.1.15",
     "mypy == 1.8.0",
     "autoflake",
     "ellar-cli >= 0.3.3",
