@@ -1,9 +1,9 @@
-import asyncio
 import typing as t
 from logging.config import fileConfig
 
 from alembic import context
 from ellar.app import current_injector
+from ellar.threading import run_as_async
 
 from ellar_sql.migrations import (
     MultipleDatabaseAlembicEnvMigration,
@@ -38,11 +38,14 @@ AlembicEnvMigrationKlass: t.Type[
 # ... etc.
 
 
-alembic_env_migration = AlembicEnvMigrationKlass(db_service)
+@run_as_async
+async def main():
+    alembic_env_migration = AlembicEnvMigrationKlass(db_service)
 
-if context.is_offline_mode():
-    alembic_env_migration.run_migrations_offline(context)  # type:ignore[arg-type]
-else:
-    asyncio.get_event_loop().run_until_complete(
-        alembic_env_migration.run_migrations_online(context)  # type:ignore[arg-type]
-    )
+    if context.is_offline_mode():
+        alembic_env_migration.run_migrations_offline(context)  # type:ignore[arg-type]
+    else:
+        await alembic_env_migration.run_migrations_online(context)  # type:ignore[arg-type]
+
+
+main()

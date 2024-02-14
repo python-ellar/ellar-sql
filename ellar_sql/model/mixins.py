@@ -2,7 +2,6 @@ import typing as t
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
-from pydantic.v1 import BaseModel
 
 from ellar_sql.constant import ABSTRACT_KEY, DATABASE_KEY, DEFAULT_KEY, TABLE_KEY
 from ellar_sql.model.utils import (
@@ -11,13 +10,6 @@ from ellar_sql.model.utils import (
     should_set_table_name,
 )
 from ellar_sql.schemas import ModelBaseConfig, ModelMetaStore
-
-
-class asss(BaseModel):
-    sd: str
-
-
-IncEx = t.Union[t.Set[int], t.Set[str], t.Dict[int, t.Any], t.Dict[str, t.Any]]
 
 if t.TYPE_CHECKING:
     from .base import ModelBase
@@ -143,7 +135,6 @@ class ModelDataExportMixin:
         exclude: t.Optional[t.Set[str]] = None,
         exclude_none: bool = False,
     ) -> t.Dict[str, t.Any]:
-        # TODO: implement advance exclude and include that goes deep into relationships too
         return dict(
             self._iter(include=include, exclude_none=exclude_none, exclude=exclude)
         )

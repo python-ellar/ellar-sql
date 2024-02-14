@@ -11,6 +11,7 @@ packages = [{include = "single_db"}]
 python = "^3.8"
 ellar-cli = "^0.2.6"
 ellar = "^0.6.2"
+ellar-sql = "^0.0.1"
 
 
 [build-system]

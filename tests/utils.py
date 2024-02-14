@@ -5,7 +5,7 @@ import shlex
 import shutil
 import subprocess
 
-from ellar.common.utils.importer import get_main_directory_by_stack
+from ellar.utils.importer import get_main_directory_by_stack
 
 SAMPLE_DUMB_DIRS = get_main_directory_by_stack("__main__/dumbs/", stack_level=1)
 SAMPLE_DIRS = get_main_directory_by_stack(

@@ -25,9 +25,10 @@ def bootstrap():
     ).set_license("MIT Licence", url="https://www.google.com")
 
     document = document_builder.build_document(application)
-    application.install_module(
-        OpenAPIDocumentModule.setup(
-            document=document, docs_ui=SwaggerUI(dark_theme=True), guards=[]
-        )
+    OpenAPIDocumentModule.setup(
+        app=application,
+        document=document,
+        docs_ui=SwaggerUI(dark_theme=True),
+        guards=[],
     )
     return application

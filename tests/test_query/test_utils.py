@@ -3,12 +3,14 @@ import typing as t
 import pytest
 from ellar.app import App
 from ellar.common import NotFound
-from ellar.threading import execute_coroutine_with_sync_worker
+from ellar.threading.sync_worker import execute_coroutine
 
 from ellar_sql import (
     EllarSQLService,
     first_or_404,
+    first_or_none,
     get_or_404,
+    get_or_none,
     model,
     one_or_404,
 )
@@ -34,7 +36,7 @@ def _seed_model(app: App):
     res = session.commit()
 
     if isinstance(res, t.Coroutine):
-        execute_coroutine_with_sync_worker(res)
+        execute_coroutine(res)
 
     return user_model
 
@@ -60,6 +62,16 @@ async def test_get_or_404_async_works(ignore_base, app_ctx_async, anyio_backend)
             await get_or_404(user_model, 2)
 
 
+async def test_get_or_none_async_works(ignore_base, app_ctx_async, anyio_backend):
+    if anyio_backend == "asyncio":
+        user_model = _seed_model(app_ctx_async)
+
+        user_instance = await get_or_none(user_model, 1)
+        assert user_instance.name == "First User"
+
+        assert await get_or_none(user_model, 2) is None
+
+
 async def test_first_or_404_works(ignore_base, app_ctx, anyio_backend):
     user_model = _seed_model(app_ctx)
 
@@ -70,6 +82,19 @@ async def test_first_or_404_works(ignore_base, app_ctx, anyio_backend):
 
     with pytest.raises(NotFound):
         await first_or_404(model.select(user_model).where(user_model.id == 2))
+
+
+async def test_first_or_none_works(ignore_base, app_ctx, anyio_backend):
+    user_model = _seed_model(app_ctx)
+
+    user_instance = await first_or_none(
+        model.select(user_model).where(user_model.id == 1)
+    )
+    assert user_instance.name == "First User"
+
+    assert (
+        await first_or_none(model.select(user_model).where(user_model.id == 2)) is None
+    )
 
 
 async def test_first_or_404_async_works(ignore_base, app_ctx_async, anyio_backend):

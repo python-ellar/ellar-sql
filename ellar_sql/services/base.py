@@ -7,11 +7,11 @@ import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as sa_orm
 from ellar.common.exceptions import ImproperConfiguration
-from ellar.common.utils.importer import (
+from ellar.threading.sync_worker import execute_coroutine
+from ellar.utils.importer import (
     get_main_directory_by_stack,
     module_import,
 )
-from ellar.threading import execute_coroutine_with_sync_worker
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_scoped_session,
@@ -151,7 +151,7 @@ class EllarSQLService:
 
         for metadata_engine in metadata_engines:
             if metadata_engine.is_async():
-                execute_coroutine_with_sync_worker(metadata_engine.create_all_async())
+                execute_coroutine(metadata_engine.create_all_async())
                 continue
             metadata_engine.create_all()
 
@@ -162,7 +162,7 @@ class EllarSQLService:
 
         for metadata_engine in metadata_engines:
             if metadata_engine.is_async():
-                execute_coroutine_with_sync_worker(metadata_engine.drop_all_async())
+                execute_coroutine(metadata_engine.drop_all_async())
                 continue
             metadata_engine.drop_all()
 
@@ -173,7 +173,7 @@ class EllarSQLService:
 
         for metadata_engine in metadata_engines:
             if metadata_engine.is_async():
-                execute_coroutine_with_sync_worker(metadata_engine.reflect_async())
+                execute_coroutine(metadata_engine.reflect_async())
                 continue
             metadata_engine.reflect()
 

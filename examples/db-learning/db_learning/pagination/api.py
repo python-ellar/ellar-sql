@@ -17,16 +17,14 @@ class UserSchema(ec.Serializer):
 #     return User
 
 list_api_router = ec.ModuleRouter("/users-api")
+# openapi tag
+ApiTags(
+    name="API Pagination",
+    external_doc_url="https://python-ellar.github.io/ellar-sql/pagination/#api-pagination",
+)(list_api_router)
 
 
 @list_api_router.get()
 @paginate(model=User, item_schema=UserSchema)
 def list_users_api():
     pass
-
-
-# openapi tag
-ApiTags(
-    name="API Pagination",
-    external_doc_url="https://python-ellar.github.io/ellar-sql/pagination/#api-pagination",
-)(list_api_router.get_control_type())

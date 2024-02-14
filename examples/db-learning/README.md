@@ -16,6 +16,7 @@ After environment setup, kindly follow instruction below
 ```
 python manage.py runserver --reload
 ```
+Visit Swagger Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 
 ## Run Test
