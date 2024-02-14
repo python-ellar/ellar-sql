@@ -2,7 +2,7 @@
 
 import click
 from ellar.app import AppFactory, current_injector
-from ellar.common.utils.importer import get_main_directory_by_stack
+from ellar.utils.importer import get_main_directory_by_stack
 from ellar_cli.main import create_ellar_cli
 from models import User
 

@@ -3,10 +3,10 @@ import typing as t
 
 import sqlalchemy as sa
 from ellar.common import IExecutionContext, IModuleSetup, Module, middleware
-from ellar.common.utils.importer import get_main_directory_by_stack
 from ellar.core import Config, DynamicModule, ModuleBase, ModuleSetup
 from ellar.di import ProviderConfig, request_or_transient_scope
-from ellar.events import app_context_teardown_events
+from ellar.events import app_context_teardown
+from ellar.utils.importer import get_main_directory_by_stack
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -155,7 +155,7 @@ class EllarSQLModule(ModuleBase, IModuleSetup):
             )
 
         providers.append(ProviderConfig(EllarSQLService, use_value=db_service))
-        app_context_teardown_events.connect(
+        app_context_teardown.connect(
             functools.partial(cls._on_application_tear_down, db_service=db_service)
         )
 

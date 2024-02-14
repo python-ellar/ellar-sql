@@ -32,6 +32,26 @@ async def get_or_404(
     return t.cast(_O, value)
 
 
+async def get_or_none(
+    entity: t.Type[_O],
+    ident: t.Any,
+    **kwargs: t.Any,
+) -> t.Optional[_O]:
+    """ """
+    db_service = current_injector.get(EllarSQLService)
+    session = db_service.get_scoped_session()()
+
+    value = session.get(entity, ident, **kwargs)
+
+    if isinstance(value, t.Coroutine):
+        value = await value
+
+    if value is None:
+        return None
+
+    return t.cast(_O, value)
+
+
 async def first_or_404(
     statement: sa.sql.Select[t.Any], *, error_message: t.Optional[str] = None
 ) -> t.Any:
@@ -47,6 +67,23 @@ async def first_or_404(
 
     if value is None:
         raise ecm.NotFound(detail=error_message)
+
+    return value
+
+
+async def first_or_none(statement: sa.sql.Select[t.Any]) -> t.Any:
+    """ """
+    db_service = current_injector.get(EllarSQLService)
+    session = db_service.session_factory()
+
+    result = session.execute(statement)
+    if isinstance(result, t.Coroutine):
+        result = await result
+
+    value = result.scalar()
+
+    if value is None:
+        return None
 
     return value
 

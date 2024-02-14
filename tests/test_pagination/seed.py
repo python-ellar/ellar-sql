@@ -1,7 +1,7 @@
 import typing as t
 
 from ellar.app import App
-from ellar.threading import execute_coroutine_with_sync_worker
+from ellar.threading import run_as_async
 
 from ellar_sql import EllarSQLService, model
 
@@ -14,7 +14,8 @@ def create_model():
     return User
 
 
-def seed_100_users(app: App):
+@run_as_async
+async def seed_100_users(app: App):
     user_model = create_model()
     db_service = app.injector.get(EllarSQLService)
 
@@ -27,6 +28,6 @@ def seed_100_users(app: App):
 
     res = session.commit()
     if isinstance(res, t.Coroutine):
-        execute_coroutine_with_sync_worker(res)
+        await res
 
     return user_model

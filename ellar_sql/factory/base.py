@@ -2,7 +2,7 @@ import typing as t
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
-from ellar.threading import execute_coroutine_with_sync_worker
+from ellar.threading import run_as_async
 from factory.alchemy import (
     SESSION_PERSISTENCE_COMMIT,
     SESSION_PERSISTENCE_FLUSH,
@@ -36,12 +36,13 @@ class EllarSQLFactory(SQLAlchemyModelFactory):
         abstract = True
 
     @classmethod
-    def _session_execute(
+    @run_as_async
+    async def _session_execute(
         cls, session_func: t.Callable, *args: t.Any, **kwargs: t.Any
     ) -> t.Union[sa.Result, sa.CursorResult, t.Any]:
         res = session_func(*args, **kwargs)
         if isinstance(res, t.Coroutine):
-            res = execute_coroutine_with_sync_worker(res)
+            res = await res
         return res
 
     @classmethod

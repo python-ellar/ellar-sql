@@ -6,7 +6,7 @@ import ellar.common as ecm
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
 from ellar.app import current_injector
-from ellar.threading import execute_coroutine_with_sync_worker
+from ellar.threading import run_as_async
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ellar_sql.model.base import ModelBase
@@ -275,7 +275,13 @@ class Paginator(PaginatorBase):
         )
 
         if self._created_session:
-            self._session.close()  # session usage is done but only if Paginator created the session
+            self._close_session()  # session usage is done but only if Paginator created the session
+
+    @run_as_async
+    async def _close_session(self) -> None:
+        res = self._session.close()
+        if isinstance(res, t.Coroutine):
+            await res
 
     def _get_session(self) -> t.Union[sa_orm.Session, AsyncSession, t.Any]:
         self._created_session = True
@@ -284,7 +290,7 @@ class Paginator(PaginatorBase):
 
     def _query_items(self) -> t.List[t.Any]:
         if self._is_async:
-            res = execute_coroutine_with_sync_worker(self._query_items_async())
+            res = self._query_items_async()
             return list(res)
         return self._query_items_sync()
 
@@ -292,6 +298,7 @@ class Paginator(PaginatorBase):
         select = self._select.limit(self.per_page).offset(self._query_offset)
         return list(self._session.execute(select).unique().scalars())
 
+    @run_as_async
     async def _query_items_async(self) -> t.List[t.Any]:
         session = t.cast(AsyncSession, self._session)
 
@@ -302,7 +309,7 @@ class Paginator(PaginatorBase):
 
     def _query_count(self) -> int:
         if self._is_async:
-            res = execute_coroutine_with_sync_worker(self._query_count_async())
+            res = self._query_count_async()
             return int(res)
         return self._query_count_sync()
 
@@ -313,6 +320,7 @@ class Paginator(PaginatorBase):
         ).scalar()
         return out  # type:ignore[return-value]
 
+    @run_as_async
     async def _query_count_async(self) -> int:
         session = t.cast(AsyncSession, self._session)
 

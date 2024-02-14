@@ -11,6 +11,8 @@ class Table(sa.Table):
     """
     Custom SQLAlchemy Table class that supports database-binding
     E.g.:
+    ```python
+        from ellar_sql.model import Table
 
         user_book_m2m = Table(
             "user_book",
@@ -18,6 +20,7 @@ class Table(sa.Table):
             sa.Column("book_id", sa.ForeignKey(Book.id), primary_key=True),
             __database__='default'
         )
+    ```
     """
 
     @t.overload
