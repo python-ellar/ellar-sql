@@ -1,6 +1,6 @@
 """EllarSQL Module adds support for SQLAlchemy and Alembic package to your Ellar application"""
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 from .model.database_binds import get_all_metadata, get_metadata
 from .module import EllarSQLModule
