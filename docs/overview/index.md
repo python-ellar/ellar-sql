@@ -82,7 +82,7 @@ class UsersController(ecm.ControllerBase):
 
     @ecm.get("/users/{user_id:int}")
     def user_by_id(self, user_id: int):
-        user = get_or_404(User, user_id)
+        user = await get_or_404(User, user_id)
         return user.dict()
 
     @ecm.get("/")
@@ -93,7 +93,7 @@ class UsersController(ecm.ControllerBase):
     
     @ecm.get("/{user_id:int}")
     async def user_delete(self, user_id: int, session: ecm.Inject[model.Session]):
-        user = get_or_404(User, user_id)
+        user = await get_or_404(User, user_id)
         session.delete(user)
         return {'detail': f'User id={user_id} Deleted successfully'}
 ```

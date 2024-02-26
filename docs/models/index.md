@@ -262,13 +262,13 @@ import ellar.common as ecm
 from ellar_sql import get_or_404, one_or_404, model
 
 @ecm.get("/user-by-id/{user_id:int}")
-def user_by_id(user_id: int):
-    user = get_or_404(User, user_id)
+async def user_by_id(user_id: int):
+    user = await get_or_404(User, user_id)
     return user.dict()
 
 @ecm.get("/user-by-name/{name:str}")
-def user_by_username(name: str):
-    user = one_or_404(model.select(User).filter_by(name=name), error_message=f"No user named '{name}'.")
+async def user_by_username(name: str):
+    user = await one_or_404(model.select(User).filter_by(name=name), error_message=f"No user named '{name}'.")
     return user.dict()
 ```
 
