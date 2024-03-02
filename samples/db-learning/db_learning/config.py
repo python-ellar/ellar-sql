@@ -3,7 +3,7 @@ Application Configurations
 Default Ellar Configurations are exposed here through `ConfigDefaultTypesMixin`
 Make changes and define your own configurations specific to your application
 
-export ELLAR_CONFIG_MODULE=ellar_sqlachemy_example.config:DevelopmentConfig
+export ELLAR_CONFIG_MODULE=db_learning.config:DevelopmentConfig
 """
 
 import typing as t
@@ -19,7 +19,7 @@ class BaseConfig(ConfigDefaultTypesMixin):
     DEBUG: bool = False
 
     DEFAULT_JSON_CLASS: t.Type[JSONResponse] = JSONResponse
-    SECRET_KEY: str = "ellar_wltsSVEySCVC3xC2i4a0y40jlbcjTupkCX0TSoUT-R4"
+    SECRET_KEY: str = "ellar_QdZwHTfLkZQWQtAot-V6gbTHONMn3ekrl5jdcb5AOC8"
 
     # injector auto_bind = True allows you to resolve types that are not registered on the container
     # For more info, read: https://injector.readthedocs.io/en/latest/index.html
@@ -61,22 +61,33 @@ class BaseConfig(ConfigDefaultTypesMixin):
     EXCEPTION_HANDLERS: t.List[IExceptionHandler] = []
 
     # Object Serializer custom encoders
-    SERIALIZER_CUSTOM_ENCODER: t.Dict[
-        t.Any, t.Callable[[t.Any], t.Any]
-    ] = encoders_by_type
+    SERIALIZER_CUSTOM_ENCODER: t.Dict[t.Any, t.Callable[[t.Any], t.Any]] = (
+        encoders_by_type
+    )
 
 
 class DevelopmentConfig(BaseConfig):
     DEBUG: bool = True
-    # Configuration through Confog
+
     ELLAR_SQL: t.Dict[str, t.Any] = {
         "databases": {
-            "default": "sqlite:///project.db",
-            # 'db2': 'sqlite+aiosqlite:///project2.db',
+            "default": "sqlite:///app.db",
         },
         "echo": True,
         "migration_options": {
             "directory": "migrations"  # root directory will be determined based on where the module is instantiated.
         },
-        "models": ["db.models"],
+        "models": ["db_learning.models"],
+    }
+
+
+class TestConfig(BaseConfig):
+    DEBUG = False
+
+    ELLAR_SQL: t.Dict[str, t.Any] = {
+        **DevelopmentConfig.ELLAR_SQL,
+        "databases": {
+            "default": "sqlite:///test.db",
+        },
+        "echo": False,
     }

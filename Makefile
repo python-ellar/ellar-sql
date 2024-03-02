@@ -25,8 +25,8 @@ lint:fmt ## Run code linters
 	mypy ellar_sql
 
 fmt format:clean ## Run code formatters
-	ruff format ellar_sql tests examples
-	ruff check --fix ellar_sql tests examples
+	ruff format ellar_sql tests samples
+	ruff check --fix ellar_sql tests samples
 
 test:clean ## Run tests
 	pytest

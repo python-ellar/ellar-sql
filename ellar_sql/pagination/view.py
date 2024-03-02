@@ -65,8 +65,7 @@ class PaginationBase(ABC):
 
     if t.TYPE_CHECKING:
 
-        def __init__(self, **kwargs: t.Any) -> None:
-            ...
+        def __init__(self, **kwargs: t.Any) -> None: ...
 
 
 class PageNumberPagination(PaginationBase):
