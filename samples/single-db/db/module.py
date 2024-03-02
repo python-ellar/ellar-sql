@@ -17,6 +17,7 @@ class MyModule(ModuleBase):
         pass
 
 """
+
 from ellar.app import App
 from ellar.common import IApplicationStartup, Module
 from ellar.core import ModuleBase

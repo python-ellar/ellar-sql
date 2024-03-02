@@ -13,7 +13,8 @@ clean: ## Removing cached python compiled files
 	find . -name .ruff_cache  | xargs  rm -rfv
 
 install: ## Install dependencies
-	flit install --deps develop --symlink
+	pip install -r requirements.txt
+	flit install --symlink
 
 install-full: ## Install dependencies
 	make install
@@ -24,8 +25,8 @@ lint:fmt ## Run code linters
 	mypy ellar_sql
 
 fmt format:clean ## Run code formatters
-	ruff format ellar_sql tests examples
-	ruff check --fix ellar_sql tests examples
+	ruff format ellar_sql tests samples
+	ruff check --fix ellar_sql tests samples
 
 test:clean ## Run tests
 	pytest
