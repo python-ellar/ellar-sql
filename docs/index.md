@@ -2,7 +2,7 @@
 .md-content .md-typeset h1 { display: none; }
 </style>
 <p align="center">
-  <a href="#" target="blank"><img src="https://python-ellar.github.io/ellar/img/EllarLogoB.png" width="200" alt="Ellar Logo" /></a>
+  <a href="#" target="blank"><img src="https://python-ellar.github.io/ellar-sql/img/ellar_sql.png" width="200" alt="Ellar Logo" /></a>
 </p>
 <p align="center">EllarSQL is an SQL database Ellar Module.</p>
 
