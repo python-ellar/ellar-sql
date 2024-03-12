@@ -48,6 +48,12 @@ EllarSQL core dependencies includes:
 pip install ellar-sql
 ```
 
+OR if you intend to work with **Async SQLAlchemy** packages, then: 
+
+```shell
+pip install ellar-sql[async]
+```
+
 ## **Quick Example**
 Let's create a simple `User` model.
 ```python
