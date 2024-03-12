@@ -37,6 +37,11 @@ dependencies = [
     "alembic >= 1.10.0"
 ]
 
+[project.optional-dependencies]
+async = [
+    "sqlalchemy[async] >= 2.0.23"
+]
+
 [project.urls]
 Documentation = "https://github.com/python-ellar/ellar-sql"
 Source = "https://github.com/python-ellar/ellar-sql"
