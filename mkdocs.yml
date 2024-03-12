@@ -50,8 +50,8 @@ theme:
     text: Source Sans Pro
     code: Fira Code
   language: en
-  logo: img/EllarLogoB.png
-  favicon: img/Icon.svg
+  logo: img/ellar_sql.png
+  favicon: img/ellar_sql.png
   icon:
     repo: fontawesome/brands/git-alt
 
