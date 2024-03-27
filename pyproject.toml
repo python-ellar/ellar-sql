@@ -43,9 +43,9 @@ async = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/python-ellar/ellar-sql"
+Homepage = "https://github.com/python-ellar/ellar-sql"
 Source = "https://github.com/python-ellar/ellar-sql"
-Homepage = "https://python-ellar.github.io/ellar-sql/"
+Documentation = "https://python-ellar.github.io/ellar-sql/"
 "Bug Tracker" = "https://github.com/python-ellar/ellar-sql/issues"
 
 [tool.ruff]
