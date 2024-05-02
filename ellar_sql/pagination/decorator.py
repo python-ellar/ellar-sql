@@ -4,6 +4,7 @@ import typing as t
 import uuid
 
 import ellar.common as ecm
+import ellar.core as ec
 import sqlalchemy as sa
 from ellar.common import set_metadata
 from ellar.common.constants import EXTRA_ROUTE_ARGS_KEY, RESPONSE_OVERRIDE_KEY
@@ -107,7 +108,7 @@ class _PaginationOperation:
         # use unique_id to make the kwargs difficult to collide with any route function parameter
         execution_context = ecm.params.ExtraEndpointArg(
             name=f"context_{unique_id[:-6]}",
-            annotation=ecm.Inject[ecm.IExecutionContext],
+            annotation=ecm.Inject[ec.ExecutionContext],
         )
 
         set_metadata(EXTRA_ROUTE_ARGS_KEY, [_paginate_args, execution_context])(
