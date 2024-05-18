@@ -39,7 +39,7 @@ dependencies = [
 
 [project.optional-dependencies]
 async = [
-    "sqlalchemy[async] >= 2.0.23"
+    "sqlalchemy[asyncio] >= 2.0.23"
 ]
 
 [project.urls]
