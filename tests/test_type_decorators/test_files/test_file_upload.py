@@ -2,6 +2,7 @@ import tempfile
 from contextlib import asynccontextmanager
 
 import pytest
+from ellar.common.datastructures import ContentFile
 from ellar_storage import StorageService
 from libcloud.storage.types import ObjectDoesNotExistError
 
@@ -130,6 +131,29 @@ class TestSingleField:
     async def test_create_rollback(self, fake_file, fake_content, app_setup) -> None:
         async with self.init_app(app_setup) as (app, db_service, session):
             session.add(Attachment(name="Create rollback", content=fake_file))
+            session.flush()
+            attachment = session.execute(
+                model.select(Attachment).where(Attachment.name == "Create rollback")
+            ).scalar_one()
+            file_id = attachment.content.file_id
+
+            storage_service: StorageService = app.injector.get(StorageService)
+
+            assert storage_service.get_container().get_object(file_id) is not None
+            session.rollback()
+            with pytest.raises(ObjectDoesNotExistError):
+                storage_service.get_container().get_object(file_id)
+
+    async def test_create_rollback_with_uploadFile(
+        self, fake_file, fake_content, app_setup
+    ) -> None:
+        async with self.init_app(app_setup) as (app, db_service, session):
+            session.add(
+                Attachment(
+                    name="Create rollback",
+                    content=ContentFile(b"UploadFile should work just fine"),
+                )
+            )
             session.flush()
             attachment = session.execute(
                 model.select(Attachment).where(Attachment.name == "Create rollback")

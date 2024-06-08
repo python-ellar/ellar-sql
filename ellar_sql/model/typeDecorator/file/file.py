@@ -6,6 +6,7 @@ from datetime import datetime
 from ellar.app import current_injector
 from ellar_storage import StorageService, StoredFile
 from sqlalchemy_file.file import File as BaseFile
+from starlette.datastructures import UploadFile
 
 from ellar_sql.constant import DEFAULT_STORAGE_PLACEHOLDER
 
@@ -39,6 +40,14 @@ class File(BaseFile):
         content_path: t.Optional[str] = None,
         **kwargs: t.Dict[str, t.Any],
     ) -> None:
+        if isinstance(content, UploadFile):
+            filename = content.filename
+            content_type = content.content_type
+
+            kwargs.setdefault("headers", dict(content.headers))
+
+            content = content.file
+
         super().__init__(
             content=content,
             filename=filename,

@@ -70,6 +70,7 @@ nav:
   - Models:
       - index: models/index.md
       - Extra Fields: models/extra-fields.md
+      - File and Image Fields: models/file-fields.md
   - Pagination: pagination/index.md
   - Multiple Database: multiple/index.md
   - Migrations:
