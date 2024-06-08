@@ -253,7 +253,7 @@ class TestModelFactoryAsync:
 
         assert group.dict() == group2.dict() != group3.dict()
 
-        db_service_async.session_factory.close()
+        await db_service_async.session_factory.close()
 
     async def test_model_factory_get_or_create_for_integrity_error_async(
         self, db_service_async, ignore_base
@@ -276,7 +276,7 @@ class TestModelFactoryAsync:
         with pytest.raises(IntegrityError):
             group_factory(name="new group", user=group.user)
 
-        db_service_async.session_factory.close()
+        await db_service_async.session_factory.close()
 
     async def test_model_factory_get_or_create_raises_error_for_missing_field_async(
         self, db_service_async, ignore_base
