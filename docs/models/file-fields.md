@@ -247,4 +247,4 @@ class ArticlesController(ecm.ControllerBase):
 - [Validators](https://jowilf.github.io/sqlalchemy-file/tutorial/using-files-in-models/#validators)
 - [Processors](https://jowilf.github.io/sqlalchemy-file/tutorial/using-files-in-models/#processors)
 
-For a more comprehensive hands-on experience, check out the [file-field-example](https://github.com/python-ellar/ellar-sql/tree/main/samples/file-field-example) project.
+For a more comprehensive hands-on experience, check out the [file-field-example](https://github.com/python-ellar/ellar-sql/tree/master/samples/file-field-example) project.
