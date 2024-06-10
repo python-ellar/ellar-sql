@@ -93,7 +93,7 @@ class TestMultipleField:
                     AttachmentMultipleFields.name == "Create multiple content rollback"
                 )
             ).scalar_one()
-            paths = [p["path"] for p in attachment.multiple_content]
+            paths = [p.path for p in attachment.multiple_content]
             storage_service: StorageService = app.injector.get(StorageService)
             assert all(storage_service.get(path) is not None for path in paths)
             session.rollback()
@@ -116,7 +116,7 @@ class TestMultipleField:
                     AttachmentMultipleFields.name == "Multiple content edit all"
                 )
             ).scalar_one()
-            old_paths = [f["path"] for f in attachment.multiple_content]
+            old_paths = [f.path for f in attachment.multiple_content]
             attachment.multiple_content = [b"Content 1 edit", b"Content 2 edit"]
             session.add(attachment)
             session.commit()
@@ -145,14 +145,14 @@ class TestMultipleField:
                     == "Multiple content edit all rollback"
                 )
             ).scalar_one()
-            old_paths = [f["path"] for f in attachment.multiple_content]
+            old_paths = [f.path for f in attachment.multiple_content]
             attachment.multiple_content = [b"Content 1 edit", b"Content 2 edit"]
             session.add(attachment)
             session.flush()
             session.refresh(attachment)
             assert attachment.multiple_content[0].file.read() == b"Content 1 edit"
             assert attachment.multiple_content[1].file.read() == b"Content 2 edit"
-            new_paths = [f["path"] for f in attachment.multiple_content]
+            new_paths = [f.path for f in attachment.multiple_content]
             session.rollback()
 
             storage_service: StorageService = app.injector.get(StorageService)

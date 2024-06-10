@@ -6,4 +6,6 @@ class Attachment(model.Model):
 
     id: model.Mapped[int] = model.mapped_column(autoincrement=True, primary_key=True)
     name: model.Mapped[str] = model.mapped_column(model.String(50), unique=True)
-    content: model.Mapped[dict] = model.mapped_column(model.typeDecorator.FileField)
+    content: model.Mapped[model.typeDecorator.File] = model.mapped_column(
+        model.typeDecorator.FileField
+    )

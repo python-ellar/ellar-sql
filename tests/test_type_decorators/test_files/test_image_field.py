@@ -56,7 +56,6 @@ class Book(model.Model):
 
 
 @pytest.mark.asyncio
-# @pytest.mark.usefixtures("ignore_base")
 class TestImageField:
     @asynccontextmanager
     async def init_app(self, app_setup):
@@ -95,5 +94,5 @@ class TestImageField:
             ).scalar_one()
             assert book.cover.file.read() == fake_valid_image_content
 
-            assert book.cover["width"] is not None
-            assert book.cover["height"] is not None
+            assert book.cover.width is not None
+            assert book.cover.height is not None

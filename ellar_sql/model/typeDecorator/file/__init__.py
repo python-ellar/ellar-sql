@@ -1,3 +1,4 @@
+from .exceptions import FileExceptionHandler
 from .file import File
 from .file_tracker import ModifiedFileFieldSessionTracker
 from .processors import Processor, ThumbnailGenerator
@@ -14,6 +15,7 @@ __all__ = [
     "ImageField",
     "Processor",
     "ThumbnailGenerator",
+    "FileExceptionHandler",
 ]
 
 

@@ -4,6 +4,7 @@ import warnings
 from datetime import datetime
 
 from ellar.app import current_injector
+from ellar.common.compatible import AttributeDictAccessMixin
 from ellar_storage import StorageService, StoredFile
 from sqlalchemy_file.file import File as BaseFile
 from starlette.datastructures import UploadFile
@@ -11,7 +12,7 @@ from starlette.datastructures import UploadFile
 from ellar_sql.constant import DEFAULT_STORAGE_PLACEHOLDER
 
 
-class File(BaseFile):
+class File(BaseFile, AttributeDictAccessMixin):
     """Takes a file as content and uploads it to the appropriate storage
     according to the attached Column and file information into the
     database as JSON.
@@ -19,11 +20,11 @@ class File(BaseFile):
     Default attributes provided for all ``File`` include:
 
     Attributes:
-        filename (str):  This is the name of the uploaded file
-        file_id:   This is the generated UUID for the uploaded file
-        upload_storage:   Name of the storage used to save the uploaded file
-        path:            This is a  combination of `upload_storage` and `file_id` separated by
-                        `/`. This will be use later to retrieve the file
+        filename (str): This is the name of the uploaded file
+        file_id: This is the generated UUID for the uploaded file
+        upload_storage: Name of the storage used to save the uploaded file
+        path: This is a combination of `upload_storage` and `file_id` separated by
+                        `/`. This will be used later to retrieve the file
         content_type:   This is the content type of the uploaded file
         uploaded_at (datetime):    This is the upload date in ISO format
         url (str):            CDN url of the uploaded file
@@ -31,6 +32,21 @@ class File(BaseFile):
                       [StorageManager.get_file()][sqlalchemy_file.storage.StorageManager.get_file]
                       on path and return an instance of `StoredFile`
     """
+
+    filename: str
+    file_id: str
+
+    upload_storage: str
+    path: str
+
+    content_type: str
+    uploaded_at: str
+    url: str
+
+    saved: bool
+    size: int
+
+    files: t.List[str]
 
     def __init__(
         self,
@@ -132,3 +148,8 @@ class File(BaseFile):
             storage_service = current_injector.get(StorageService)
             return storage_service.get(self["path"])
         raise RuntimeError("Only available for saved file")
+
+    def __missing__(self, name: t.Any) -> t.Any:
+        if name in ["_frozen", "__clause_element__", "__pydantic_validator__"]:
+            return super().__missing__(name)
+        return None

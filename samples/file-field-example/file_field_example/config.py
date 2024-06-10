@@ -14,6 +14,8 @@ from ellar.core.versioning import BaseAPIVersioning, DefaultAPIVersioning
 from ellar.pydantic import ENCODERS_BY_TYPE as encoders_by_type
 from starlette.middleware import Middleware
 
+from ellar_sql.model.typeDecorator.file import FileExceptionHandler
+
 
 class BaseConfig(ConfigDefaultTypesMixin):
     DEBUG: bool = False
@@ -58,7 +60,7 @@ class BaseConfig(ConfigDefaultTypesMixin):
     # Exception handler callables should be of the form
     # `handler(context:IExecutionContext, exc: Exception) -> response`
     # and may be either standard functions, or async functions.
-    EXCEPTION_HANDLERS: t.List[IExceptionHandler] = []
+    EXCEPTION_HANDLERS: t.List[IExceptionHandler] = [FileExceptionHandler]
 
     # Object Serializer custom encoders
     SERIALIZER_CUSTOM_ENCODER: t.Dict[t.Any, t.Callable[[t.Any], t.Any]] = (
