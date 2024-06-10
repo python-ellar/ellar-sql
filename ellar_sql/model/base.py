@@ -174,4 +174,4 @@ class ModelBase(ModelDataExportMixin):
 
 
 class Model(ModelBase, metaclass=ModelMeta):
-    __base_config__: t.Union[ModelBaseConfig, t.Dict[str, t.Any]]
+    __base_config__: t.ClassVar[t.Union[ModelBaseConfig, t.Dict[str, t.Any]]]

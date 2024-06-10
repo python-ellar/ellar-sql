@@ -21,7 +21,7 @@ such as **model**, **session**, and **engine**, ensuring an efficient and cohere
 
 Notably, EllarSQL refrains from altering the fundamental workings or usage of SQLAlchemy. 
 This documentation is focused on the meticulous setup of EllarSQL. For an in-depth exploration of SQLAlchemy, 
-we recommend referring to the comprehensive [SQLAlchemy documentation](https://docs.sqlalchemy.org/).
+we recommend referring to the comprehensive [SQLAlchemy documentation](https://docs.sqlalchemy.org/){target="_blank"}.
 
 ## **Feature Highlights**
 EllarSQL comes packed with a set of awesome features designed:

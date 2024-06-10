@@ -105,7 +105,7 @@ class TestModelExportAsync:
             "id": 1,
             "name": "Ellar",
         }
-        db_service_async.session_factory.close()
+        await db_service_async.session_factory.close()
 
     async def test_model_exclude_none_async(self, db_service_async, ignore_base):
         user_factory = get_model_factory(db_service_async)
@@ -121,7 +121,7 @@ class TestModelExportAsync:
             "id": 1,
             "name": "Ellar",
         }
-        db_service_async.session_factory.close()
+        await db_service_async.session_factory.close()
 
     async def test_model_export_include_async(self, db_service_async, ignore_base):
         user_factory = get_model_factory(db_service_async)
@@ -135,7 +135,7 @@ class TestModelExportAsync:
             "id",
             "name",
         }
-        db_service_async.session_factory.close()
+        await db_service_async.session_factory.close()
 
     async def test_model_export_exclude_async(self, db_service_async, ignore_base):
         user_factory = get_model_factory(db_service_async)
@@ -145,4 +145,4 @@ class TestModelExportAsync:
         user = user_factory()
 
         assert user.dict(exclude={"email", "name"}).keys() == {"address", "city", "id"}
-        db_service_async.session_factory.close()
+        await db_service_async.session_factory.close()

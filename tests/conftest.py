@@ -1,7 +1,9 @@
+import os
 import typing as t
 
 import pytest
 from ellar.testing import Test
+from ellar_storage import Provider, StorageModule, get_driver
 
 from ellar_sql import EllarSQLModule, EllarSQLService, model
 from ellar_sql.model.database_binds import __model_database_metadata__
@@ -97,9 +99,24 @@ def app_setup(tmp_path):
                 }
             },
         )
+        storage_config = kwargs.setdefault("config_module", {}).setdefault(
+            "STORAGE_CONFIG", {}
+        )
+        storage_config.setdefault(
+            "storages",
+            {
+                "test": {
+                    "driver": get_driver(Provider.LOCAL),
+                    "options": {"key": os.path.join(tmp_path, "media")},
+                }
+            },
+        )
         sql_module.setdefault("migration_options", {"directory": "migrations"})
         tm = Test.create_test_module(
-            modules=[EllarSQLModule.setup(root_path=str(tmp_path), **sql_module)],
+            modules=[
+                EllarSQLModule.setup(root_path=str(tmp_path), **sql_module),
+                StorageModule.register_setup(),
+            ],
             **kwargs,
         )
         return tm.create_application()
