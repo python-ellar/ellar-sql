@@ -1,14 +1,12 @@
 import os
 
 import pytest
-import sqlalchemy as sa
 from db_learning.root_module import ApplicationModule
 from ellar.common.constants import ELLAR_CONFIG_MODULE
 from ellar.testing import Test
+from ellar.threading.sync_worker import execute_async_context_manager
 
 from ellar_sql import EllarSQLService
-
-from . import common
 
 os.environ.setdefault(ELLAR_CONFIG_MODULE, "db_learning.config:TestConfig")
 
@@ -16,7 +14,10 @@ os.environ.setdefault(ELLAR_CONFIG_MODULE, "db_learning.config:TestConfig")
 @pytest.fixture(scope="session")
 def tm():
     test_module = Test.create_test_module(modules=[ApplicationModule])
-    yield test_module
+    app = test_module.create_application()
+
+    with execute_async_context_manager(app.application_context()):
+        yield test_module
 
 
 @pytest.fixture(scope="session")
@@ -26,23 +27,5 @@ def db(tm):
 
     yield
 
-    db_service.drop_all()
-
-
-@pytest.fixture(scope="session")
-def db_session(db, tm):
-    db_service = tm.get(EllarSQLService)
-
-    yield db_service.session_factory()
-
     db_service.session_factory.remove()
-
-
-@pytest.fixture
-def factory_session(db, tm):
-    engine = tm.get(sa.Engine)
-    common.Session.configure(bind=engine)
-
-    yield
-
-    common.Session.remove()
+    db_service.drop_all()

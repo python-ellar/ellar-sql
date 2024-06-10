@@ -216,47 +216,52 @@ Now, let's create a factory for our user model in `tests/factories.py`:
 
 ```python title="tests/factories.py"
 import factory
-from ellar_sql.factory import EllarSQLFactory, SESSION_PERSISTENCE_FLUSH
 from db_learning.models import User
-from . import common
+from ellar.app import current_injector
+from sqlalchemy.orm import Session
+
+from ellar_sql.factory import SESSION_PERSISTENCE_FLUSH, EllarSQLFactory
+
+
+def _get_session():
+    session = current_injector.get(Session)
+    return session
 
 class UserFactory(EllarSQLFactory):
     class Meta:
         model = User
         sqlalchemy_session_persistence = SESSION_PERSISTENCE_FLUSH
-        sqlalchemy_session_factory = lambda: common.Session()
+        sqlalchemy_session_factory = _get_session
 
     username = factory.Faker('username')
     email = factory.Faker('email')
 ```
 
-The `UserFactory` depends on a database session. Since the pytest fixture we created applies to it, 
-we also need a session factory in `tests/common.py`:
+The `UserFactory` depends on a database Session as you see from `_get_session()` function.
+We need to ensure that test fixture provides `ApplicationContext` for `current_injector` to work.
 
-```python title="tests/common.py"
-from sqlalchemy import orm
-
-Session = orm.scoped_session(orm.sessionmaker())
-```
-
-Additionally, we require a fixture responsible for configuring the Factory session in `tests/conftest.py`:
+So in `tests/conftest.py`, we make `tm` test fixture to run application context:
 
 ```python title="tests/conftest.py"
 import os
+
 import pytest
-import sqlalchemy as sa
+from db_learning.root_module import ApplicationModule
 from ellar.common.constants import ELLAR_CONFIG_MODULE
 from ellar.testing import Test
+from ellar.threading.sync_worker import execute_async_context_manager
+
 from ellar_sql import EllarSQLService
-from db_learning.root_module import ApplicationModule
-from . import common
 
 os.environ.setdefault(ELLAR_CONFIG_MODULE, "db_learning.config:TestConfig")
 
 @pytest.fixture(scope='session')
 def tm():
     test_module = Test.create_test_module(modules=[ApplicationModule])
-    yield test_module
+    app = test_module.create_application()
+    
+    with execute_async_context_manager(app.application_context()):
+        yield test_module
 
 # Fixture for creating a database session for testing
 @pytest.fixture(scope='session')
@@ -270,28 +275,7 @@ def db(tm):
 
     # Dropping all tables after the tests
     db_service.drop_all()
-
-# Fixture for creating a database session for testing
-@pytest.fixture(scope='session')
-def db_session(db, tm):
-    db_service = tm.get(EllarSQLService)
-
-    yield db_service.session_factory()
-
-    # Removing the session factory
-    db_service.session_factory.remove()
-
-@pytest.fixture
-def factory_session(db, tm):
-    engine = tm.get(sa.Engine)
-    common.Session.configure(bind=engine)
-    yield 
-    common.Session.remove()
 ```
-
-In the `factory_session` fixture, we retrieve the `Engine` registered in the DI container by **EllarSQLModule**. 
-Using this engine, we configure the common `Session`. It's important to note that if you are using an 
-async database driver, **EllarSQLModule** will register `AsyncEngine`.
 
 With this setup, we can rewrite our `test_username_must_be_unique` test using `UserFactory` and `factory_session`:
 

@@ -20,7 +20,7 @@ from .factories import UserFactory
 #         db_session.commit()
 
 
-def test_username_must_be_unique(factory_session):
+def test_username_must_be_unique(db):
     user1 = UserFactory()
     with pytest.raises(sa_exc.IntegrityError):
         UserFactory(username=user1.username)
