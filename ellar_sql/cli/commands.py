@@ -1,5 +1,5 @@
 import ellar_cli.click as click
-from ellar.app import current_injector
+from ellar.core import current_injector
 
 from ellar_sql.services import EllarSQLService
 

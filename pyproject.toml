@@ -32,7 +32,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "ellar-cli >= 0.3.7",
+    "ellar-cli >= 0.4.3",
     "sqlalchemy >= 2.0.23",
     "alembic >= 1.10.0",
     "ellar-storage >= 0.1.4",

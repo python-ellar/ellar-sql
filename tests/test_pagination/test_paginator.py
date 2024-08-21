@@ -8,7 +8,7 @@ from .seed import create_model, seed_100_users
 
 
 async def test_user_model_paginator(ignore_base, app_ctx, anyio_backend):
-    user_model = seed_100_users(app_ctx)
+    user_model = seed_100_users()
     page1 = Paginator(model=user_model, per_page=25, page=1, count=True)
     assert page1.page == 1
 
@@ -20,7 +20,7 @@ async def test_user_model_paginator(ignore_base, app_ctx, anyio_backend):
 
 
 async def test_user_model_paginator_async(ignore_base, app_ctx_async, anyio_backend):
-    user_model = seed_100_users(app_ctx_async)
+    user_model = seed_100_users()
     page2 = Paginator(model=user_model, per_page=25, page=2, count=True)
     assert page2.page == 2
 
@@ -35,7 +35,7 @@ async def test_user_model_paginator_async(ignore_base, app_ctx_async, anyio_back
 
 
 async def test_paginate_qs(ignore_base, app_ctx, anyio_backend):
-    user_model = seed_100_users(app_ctx)
+    user_model = seed_100_users()
 
     p = Paginator(model=user_model, page=2, per_page=10)
     assert p.page == 2
@@ -43,14 +43,14 @@ async def test_paginate_qs(ignore_base, app_ctx, anyio_backend):
 
 
 async def test_paginate_max(ignore_base, app_ctx, anyio_backend):
-    user_model = seed_100_users(app_ctx)
+    user_model = seed_100_users()
 
     p = Paginator(model=user_model, per_page=100, max_per_page=50)
     assert p.per_page == 50
 
 
 async def test_next_page_size(ignore_base, app_ctx, anyio_backend):
-    user_model = seed_100_users(app_ctx)
+    user_model = seed_100_users()
 
     p = Paginator(model=user_model, per_page=25, max_per_page=50)
     assert p.page == 1
@@ -62,7 +62,7 @@ async def test_next_page_size(ignore_base, app_ctx, anyio_backend):
 
 
 async def test_no_count(ignore_base, app_ctx, anyio_backend):
-    user_model = seed_100_users(app_ctx)
+    user_model = seed_100_users()
 
     p = Paginator(model=user_model, count=False)
     assert p.total is None

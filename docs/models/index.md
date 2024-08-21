@@ -176,7 +176,7 @@ class User(model.Model):
 We have created a `User` model but the data does not exist. Let's fix that
 
 ```python
-from ellar.app import current_injector
+from ellar.core import current_injector
 from ellar_sql import EllarSQLService
 
 db_service = current_injector.get(EllarSQLService)
@@ -285,7 +285,7 @@ Although with `EllarSQLService` you can get the `engine` and `session`. It's the
 ```python
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
-from ellar.app import current_injector
+from ellar.core import current_injector
 from ellar_sql import EllarSQLService
 
 db_service = current_injector.get(EllarSQLService)
@@ -303,7 +303,7 @@ assert isinstance(db_service.session_factory(), sa_orm.Session)
 ```python
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
-from ellar.app import current_injector
+from ellar.core import current_injector
 
 # get engine from DI
 default_engine = current_injector.get(sa.Engine)
@@ -317,7 +317,7 @@ assert isinstance(session, sa_orm.Session)
 For Async Database options
 ```python
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
-from ellar.app import current_injector
+from ellar.core import current_injector
 
 # get engine from DI
 default_engine = current_injector.get(AsyncEngine)

@@ -3,7 +3,7 @@ import typing as t
 import ellar.common as ecm
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
-from ellar.app import current_injector
+from ellar.core import current_injector
 
 from ellar_sql.services import EllarSQLService
 

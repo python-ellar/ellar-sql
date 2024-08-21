@@ -3,7 +3,7 @@ import typing as t
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
-from ellar.app import current_injector
+from ellar.core import current_injector
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ellar_sql.constant import DATABASE_BIND_KEY, DATABASE_KEY, DEFAULT_KEY

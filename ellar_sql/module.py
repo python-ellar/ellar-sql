@@ -2,10 +2,11 @@ import functools
 import typing as t
 
 import sqlalchemy as sa
-from ellar.common import IExecutionContext, IModuleSetup, Module, middleware
+from ellar.common import IHostContext, IModuleSetup, Module
 from ellar.core import Config, DynamicModule, ModuleBase, ModuleSetup
+from ellar.core.middleware import as_middleware
+from ellar.core.modules import ModuleRefBase
 from ellar.di import ProviderConfig, request_or_transient_scope
-from ellar.events import app_context_teardown
 from ellar.utils.importer import get_main_directory_by_stack
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -26,32 +27,49 @@ def _invalid_configuration(message: str) -> t.Callable:
     return _raise_exception
 
 
-@Module(commands=[DBCommands])
-class EllarSQLModule(ModuleBase, IModuleSetup):
-    @middleware()
-    async def session_middleware(
-        cls, context: IExecutionContext, call_next: t.Callable[..., t.Coroutine]
-    ):
-        connection = context.switch_to_http_connection().get_client()
+@as_middleware
+async def session_middleware(
+    context: IHostContext, call_next: t.Callable[..., t.Coroutine]
+):
+    connection = context.switch_to_http_connection().get_client()
 
-        db_session = connection.service_provider.get(EllarSQLService)
-        session = db_session.session_factory()
+    db_service = context.get_service_provider().get(EllarSQLService)
+    session = db_service.session_factory()
 
-        connection.state.session = session
+    connection.state.session = session
 
-        try:
-            await call_next()
-        except Exception as ex:
-            res = session.rollback()
-            if isinstance(res, t.Coroutine):
-                await res
-            raise ex
-
-    @classmethod
-    async def _on_application_tear_down(cls, db_service: EllarSQLService) -> None:
-        res = db_service.session_factory.remove()
+    try:
+        await call_next()
+    except Exception as ex:
+        res = session.rollback()
         if isinstance(res, t.Coroutine):
             await res
+        raise ex
+
+    res = db_service.session_factory.remove()
+    if isinstance(res, t.Coroutine):
+        await res
+
+
+@Module(
+    commands=[DBCommands],
+    exports=[
+        EllarSQLService,
+        Session,
+        AsyncSession,
+        AsyncEngine,
+        sa.Engine,
+        MigrationOption,
+    ],
+    providers=[EllarSQLService],
+    name="EllarSQL",
+)
+class EllarSQLModule(ModuleBase, IModuleSetup):
+    @classmethod
+    def post_build(cls, module_ref: "ModuleRefBase") -> None:
+        module_ref.config.MIDDLEWARE = list(module_ref.config.MIDDLEWARE) + [
+            session_middleware
+        ]
 
     @classmethod
     def setup(
@@ -155,8 +173,10 @@ class EllarSQLModule(ModuleBase, IModuleSetup):
             )
 
         providers.append(ProviderConfig(EllarSQLService, use_value=db_service))
-        app_context_teardown.connect(
-            functools.partial(cls._on_application_tear_down, db_service=db_service)
+        providers.append(
+            ProviderConfig(
+                MigrationOption, use_value=lambda: db_service.migration_options
+            )
         )
 
         return DynamicModule(
@@ -182,7 +202,7 @@ class EllarSQLModule(ModuleBase, IModuleSetup):
 
     @staticmethod
     def __register_setup_factory(
-        module: t.Type["EllarSQLModule"],
+        module_ref: ModuleRefBase,
         config: Config,
         root_path: str,
         override_config: t.Dict[str, t.Any],
@@ -201,6 +221,7 @@ class EllarSQLModule(ModuleBase, IModuleSetup):
                 stack_level=0,
                 from_dir=defined_config["root_path"],
             )
+            module = t.cast(t.Type["EllarSQLModule"], module_ref.module)
 
             return module.__setup_module(schema)
         raise RuntimeError("Could not find `ELLAR_SQL` in application config.")

@@ -51,10 +51,12 @@ def _get_route_test_route(
     [(LimitOffsetPagination, {"limit": 5}), (PageNumberPagination, {"per_page": 5})],
 )
 def test_paginate_template_case_1_async(ignore_base, app_setup, pagination_class, kw):
-    app = app_setup(base_directory=base, template_folder="templates")
-    user_model = seed_100_users(app)
-
-    app.router.append(_get_route_test_route(user_model, pagination_class, **kw))
+    user_model = seed_100_users()
+    app = app_setup(
+        base_directory=base,
+        template_folder="templates",
+        routers=[_get_route_test_route(user_model, pagination_class, **kw)],
+    )
     client = TestClient(app)
 
     res = client.get("/list")
@@ -72,12 +74,15 @@ def test_paginate_template_case_1_async(ignore_base, app_setup, pagination_class
     [(LimitOffsetPagination, {"limit": 5}), (PageNumberPagination, {"per_page": 5})],
 )
 def test_paginate_template_case_2_async(ignore_base, app_setup, pagination_class, kw):
-    app = app_setup(base_directory=base, template_folder="templates")
-    user_model = seed_100_users(app)
-
-    app.router.append(
-        _get_route_test_route(user_model, pagination_class, case_2=True, **kw)
+    user_model = seed_100_users()
+    app = app_setup(
+        base_directory=base,
+        template_folder="templates",
+        routers=[
+            _get_route_test_route(user_model, pagination_class, case_2=True, **kw)
+        ],
     )
+
     client = TestClient(app)
 
     res = client.get("/list")
@@ -95,12 +100,15 @@ def test_paginate_template_case_2_async(ignore_base, app_setup, pagination_class
     [(LimitOffsetPagination, {"limit": 5}), (PageNumberPagination, {"per_page": 5})],
 )
 def test_paginate_template_case_3_async(ignore_base, app_setup, pagination_class, kw):
-    app = app_setup(base_directory=base, template_folder="templates")
-    user_model = seed_100_users(app)
-
-    app.router.append(
-        _get_route_test_route(user_model, pagination_class, case_3=True, **kw)
+    user_model = seed_100_users()
+    app = app_setup(
+        base_directory=base,
+        template_folder="templates",
+        routers=[
+            _get_route_test_route(user_model, pagination_class, case_3=True, **kw)
+        ],
     )
+
     client = TestClient(app)
 
     res = client.get("/list")
@@ -120,12 +128,15 @@ def test_paginate_template_case_3_async(ignore_base, app_setup, pagination_class
 def test_paginate_template_case_invalid_async(
     ignore_base, app_setup, pagination_class, kw
 ):
-    app = app_setup(base_directory=base, template_folder="templates")
-    user_model = seed_100_users(app)
-
-    app.router.append(
-        _get_route_test_route(user_model, pagination_class, invalid=True, **kw)
+    user_model = seed_100_users()
+    app = app_setup(
+        base_directory=base,
+        template_folder="templates",
+        routers=[
+            _get_route_test_route(user_model, pagination_class, invalid=True, **kw)
+        ],
     )
+
     client = TestClient(app, raise_server_exceptions=False)
 
     res = client.get("/list")
@@ -133,15 +144,14 @@ def test_paginate_template_case_invalid_async(
 
 
 def test_api_paginate_case_1_async(ignore_base, app_setup):
-    app = app_setup()
-    user_model = seed_100_users(app)
+    user_model = seed_100_users()
 
     @ecm.get("/list")
     @paginate(item_schema=UserSerializer, per_page=5)
     async def paginated_user():
         return model.select(user_model)
 
-    app.router.append(paginated_user)
+    app = app_setup(routers=[paginated_user])
     client = TestClient(app)
 
     res = client.get("/list")
@@ -162,8 +172,7 @@ def test_api_paginate_case_1_async(ignore_base, app_setup):
 
 
 def test_api_paginate_with_limit_offset_case_1_async(ignore_base, app_setup):
-    app = app_setup()
-    user_model = seed_100_users(app)
+    user_model = seed_100_users()
 
     @ecm.get("/list")
     @paginate(
@@ -175,7 +184,7 @@ def test_api_paginate_with_limit_offset_case_1_async(ignore_base, app_setup):
     async def paginated_user():
         return user_model
 
-    app.router.append(paginated_user)
+    app = app_setup(routers=[paginated_user])
     client = TestClient(app)
 
     res = client.get("/list")

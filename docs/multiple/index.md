@@ -75,7 +75,7 @@ It also requires the `database` argument to target a specific database.
 
 ```python
 # Create tables for all binds
-from ellar.app import current_injector
+from ellar.core import current_injector
 from ellar_sql import EllarSQLService
 
 db_service = current_injector.get(EllarSQLService)

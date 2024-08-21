@@ -1,7 +1,7 @@
 import typing as t
 
-from ellar.app import App
-from ellar.threading import run_as_async
+from ellar.core import current_injector
+from ellar.events import ensure_build_context
 
 from ellar_sql import EllarSQLService, model
 
@@ -14,20 +14,24 @@ def create_model():
     return User
 
 
-@run_as_async
-async def seed_100_users(app: App):
+def seed_100_users():
     user_model = create_model()
-    db_service = app.injector.get(EllarSQLService)
 
-    session = db_service.session_factory()
+    @ensure_build_context(app_ready=True)
+    async def _on_context():
+        db_service = current_injector.get(EllarSQLService)
 
-    db_service.create_all()
+        session = db_service.session_factory()
 
-    for i in range(100):
-        session.add(user_model(name=f"User Number {i+1}"))
+        db_service.create_all()
 
-    res = session.commit()
-    if isinstance(res, t.Coroutine):
-        await res
+        for i in range(100):
+            session.add(user_model(name=f"User Number {i + 1}"))
+
+        res = session.commit()
+        if isinstance(res, t.Coroutine):
+            await res
+
+    _on_context()
 
     return user_model

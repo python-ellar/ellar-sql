@@ -3,6 +3,7 @@ import tempfile
 from contextlib import asynccontextmanager
 
 import pytest
+from ellar.core import injector_context
 
 from ellar_sql import EllarSQLService, model
 from ellar_sql.model.typeDecorator import ImageField
@@ -65,7 +66,7 @@ class TestImageField:
         db_service.create_all("default")
         session = db_service.session_factory()
 
-        async with app.application_context():
+        async with injector_context(app.injector):
             yield app, db_service, session
 
         db_service.drop_all("default")
