@@ -4,11 +4,7 @@ from pathlib import Path
 from ellar.app import App
 from ellar.common import (
     IApplicationStartup,
-    IExecutionContext,
-    JSONResponse,
     Module,
-    Response,
-    exception_handler,
 )
 from ellar.core import ModuleBase
 from ellar.samples.modules import HomeModule
@@ -53,7 +49,3 @@ class ApplicationModule(ModuleBase, IApplicationStartup):
     async def on_startup(self, app: App) -> None:
         db_service = app.injector.get(EllarSQLService)
         db_service.create_all()
-
-    @exception_handler(404)
-    def exception_404_handler(cls, ctx: IExecutionContext, exc: Exception) -> Response:
-        return JSONResponse({"detail": "Resource not found."}, status_code=404)
