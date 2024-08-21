@@ -1,6 +1,6 @@
 import typing as t
 
-from ellar.app import current_injector
+from ellar.core import current_injector
 from ellar_storage import StorageService
 from sqlalchemy import event, orm
 from sqlalchemy_file.types import FileFieldSessionTracker

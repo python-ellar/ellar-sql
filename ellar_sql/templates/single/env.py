@@ -1,8 +1,8 @@
 from logging.config import fileConfig
 
 from alembic import context
-from ellar.app import current_injector
-from ellar.threading import run_as_async
+from ellar.core import current_injector
+from ellar.threading import run_as_sync
 
 from ellar_sql.migrations import SingleDatabaseAlembicEnvMigration
 from ellar_sql.services import EllarSQLService
@@ -22,7 +22,7 @@ fileConfig(config.config_file_name)  # type:ignore[arg-type]
 # ... etc.
 
 
-@run_as_async
+@run_as_sync
 async def main() -> None:
     db_service: EllarSQLService = current_injector.get(EllarSQLService)
 

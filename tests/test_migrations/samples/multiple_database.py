@@ -1,6 +1,7 @@
 #!/bin/env python
 import click
-from ellar.app import AppFactory, current_injector
+from ellar.app import AppFactory
+from ellar.core import current_injector
 from ellar.utils.importer import get_main_directory_by_stack
 from ellar_cli.main import create_ellar_cli
 from models import Group, User
@@ -31,7 +32,7 @@ cli = create_ellar_cli("multiple_database:bootstrap")
 
 
 @cli.command()
-def add_user():
+async def add_user():
     session = current_injector.get(model.Session)
     user = User(name="Multiple Database App Ellar")
     group = Group(name="group")

@@ -1,6 +1,7 @@
 #!/bin/env python
 import ellar_cli.click as click
-from ellar.app import AppFactory, current_injector
+from ellar.app import AppFactory
+from ellar.core import current_injector
 from ellar.utils.importer import get_main_directory_by_stack
 from ellar_cli.main import create_ellar_cli
 from models import Group, User
@@ -32,7 +33,7 @@ cli = create_ellar_cli("multiple_database_async:bootstrap")
 
 
 @cli.command()
-@click.run_as_async
+@click.run_as_sync
 async def add_user():
     session = current_injector.get(AsyncSession)
     user = User(name="Multiple Database App Ellar")

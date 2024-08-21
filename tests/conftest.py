@@ -2,6 +2,7 @@ import os
 import typing as t
 
 import pytest
+from ellar.core import injector_context
 from ellar.testing import Test
 from ellar_storage import Provider, StorageModule, get_driver
 
@@ -152,7 +153,7 @@ def app_setup_async(tmp_path):
 async def app_ctx(app_setup):
     app = app_setup()
 
-    async with app.application_context():
+    async with injector_context(app.injector):
         yield app
 
 
@@ -160,5 +161,5 @@ async def app_ctx(app_setup):
 async def app_ctx_async(app_setup_async):
     app = app_setup_async()
 
-    async with app.application_context():
+    async with injector_context(app.injector):
         yield app

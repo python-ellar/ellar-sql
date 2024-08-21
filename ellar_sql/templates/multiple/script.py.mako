@@ -19,7 +19,7 @@ branch_labels = ${repr(branch_labels)}
 depends_on = ${repr(depends_on)}
 
 <%!
-    from ellar.app import current_injector
+    from ellar.core import current_injector
     from ellar_sql.services import EllarSQLService
 
     db_service = current_injector.get(EllarSQLService)

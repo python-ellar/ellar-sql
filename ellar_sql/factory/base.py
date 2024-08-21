@@ -2,7 +2,7 @@ import typing as t
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
-from ellar.threading import run_as_async
+from ellar.threading import run_as_sync
 from factory.alchemy import (
     SESSION_PERSISTENCE_COMMIT,
     SESSION_PERSISTENCE_FLUSH,
@@ -36,7 +36,7 @@ class EllarSQLFactory(SQLAlchemyModelFactory):
         abstract = True
 
     @classmethod
-    @run_as_async
+    @run_as_sync
     async def _session_execute(
         cls, session_func: t.Callable, *args: t.Any, **kwargs: t.Any
     ) -> t.Union[sa.Result, sa.CursorResult, t.Any]:

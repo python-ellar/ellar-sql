@@ -5,8 +5,8 @@ from math import ceil
 import ellar.common as ecm
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
-from ellar.app import current_injector
-from ellar.threading import run_as_async
+from ellar.core import current_injector
+from ellar.threading import run_as_sync
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ellar_sql.model.base import ModelBase
@@ -277,7 +277,7 @@ class Paginator(PaginatorBase):
         if self._created_session:
             self._close_session()  # session usage is done but only if Paginator created the session
 
-    @run_as_async
+    @run_as_sync
     async def _close_session(self) -> None:
         res = self._session.close()
         if isinstance(res, t.Coroutine):
@@ -298,7 +298,7 @@ class Paginator(PaginatorBase):
         select = self._select.limit(self.per_page).offset(self._query_offset)
         return list(self._session.execute(select).unique().scalars())
 
-    @run_as_async
+    @run_as_sync
     async def _query_items_async(self) -> t.List[t.Any]:
         session = t.cast(AsyncSession, self._session)
 
@@ -320,7 +320,7 @@ class Paginator(PaginatorBase):
         ).scalar()
         return out  # type:ignore[return-value]
 
-    @run_as_async
+    @run_as_sync
     async def _query_count_async(self) -> int:
         session = t.cast(AsyncSession, self._session)
 

@@ -3,8 +3,8 @@ import uuid
 import warnings
 from datetime import datetime
 
-from ellar.app import current_injector
 from ellar.common.compatible import AttributeDictAccessMixin
+from ellar.core import current_injector
 from ellar_storage import StorageService, StoredFile
 from sqlalchemy_file.file import File as BaseFile
 from starlette.datastructures import UploadFile

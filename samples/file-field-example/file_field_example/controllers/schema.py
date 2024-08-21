@@ -1,8 +1,7 @@
 import typing as t
 
 import ellar.common as ecm
-from ellar.app import current_injector
-from ellar.core import Request
+from ellar.core import Request, current_injector
 from ellar.pydantic import model_validator
 from pydantic import HttpUrl
 

@@ -6,7 +6,7 @@ from ellar_sql import EllarSQLService
 
 
 @click.command("seed")
-@click.with_app_context
+@click.with_injector_context
 def seed_user():
     db_service = current_injector.get(EllarSQLService)
     session = db_service.session_factory()
