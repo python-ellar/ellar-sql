@@ -62,9 +62,9 @@ class ModelMeta(type):
         )
         if isinstance(options, dict):
             options = ModelBaseConfig(**options)
-        assert isinstance(
-            options, ModelBaseConfig
-        ), f"{options.__class__} is not a support ModelMetaOptions"
+        assert isinstance(options, ModelBaseConfig), (
+            f"{options.__class__} is not a support ModelMetaOptions"
+        )
 
         if options.as_base:
             declarative_bases = _get_declarative_bases(options.use_bases)

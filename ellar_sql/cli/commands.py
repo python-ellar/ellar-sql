@@ -36,12 +36,12 @@ def db():
 @click.option(
     "--sql",
     is_flag=True,
-    help="Don't emit SQL to database - dump to standard output " "instead",
+    help="Don't emit SQL to database - dump to standard output instead",
 )
 @click.option(
     "--head",
     default="head",
-    help="Specify head revision or <branchname>@head to base new " "revision on",
+    help="Specify head revision or <branchname>@head to base new revision on",
 )
 @click.option(
     "--splice",
@@ -61,7 +61,7 @@ def db():
 @click.option(
     "--rev-id",
     default=None,
-    help="Specify a hardcoded revision id instead of generating " "one",
+    help="Specify a hardcoded revision id instead of generating one",
 )
 @click.pass_context
 def revision(
@@ -102,12 +102,12 @@ def revision(
 @click.option(
     "--sql",
     is_flag=True,
-    help="Don't emit SQL to database - dump to standard output " "instead",
+    help="Don't emit SQL to database - dump to standard output instead",
 )
 @click.option(
     "--head",
     default="head",
-    help="Specify head revision or <branchname>@head to base new " "revision on",
+    help="Specify head revision or <branchname>@head to base new revision on",
 )
 @click.option(
     "--splice",
@@ -127,7 +127,7 @@ def revision(
 @click.option(
     "--rev-id",
     default=None,
-    help="Specify a hardcoded revision id instead of generating " "one",
+    help="Specify a hardcoded revision id instead of generating one",
 )
 @click.option(
     "-x",
@@ -195,7 +195,7 @@ def edit(ctx, directory, revision):
 @click.option(
     "--rev-id",
     default=None,
-    help="Specify a hardcoded revision id instead of generating " "one",
+    help="Specify a hardcoded revision id instead of generating one",
 )
 @click.argument("revisions", nargs=-1)
 @click.pass_context
@@ -215,12 +215,12 @@ def merge(ctx, directory, message, branch_label, rev_id, revisions):
 @click.option(
     "--sql",
     is_flag=True,
-    help="Don't emit SQL to database - dump to standard output " "instead",
+    help="Don't emit SQL to database - dump to standard output instead",
 )
 @click.option(
     "--tag",
     default=None,
-    help='Arbitrary "tag" name - can be used by custom env.py ' "scripts",
+    help='Arbitrary "tag" name - can be used by custom env.py scripts',
 )
 @click.option(
     "-x",
@@ -246,12 +246,12 @@ def upgrade(ctx, directory, sql, tag, x_arg, revision):
 @click.option(
     "--sql",
     is_flag=True,
-    help="Don't emit SQL to database - dump to standard output " "instead",
+    help="Don't emit SQL to database - dump to standard output instead",
 )
 @click.option(
     "--tag",
     default=None,
-    help='Arbitrary "tag" name - can be used by custom env.py ' "scripts",
+    help='Arbitrary "tag" name - can be used by custom env.py scripts',
 )
 @click.option(
     "-x",
@@ -300,7 +300,7 @@ def show(ctx: click.Context, directory, revision):
     "-i",
     "--indicate-current",
     is_flag=True,
-    help="Indicate current version (Alembic 0.9.9 or greater is " "required)",
+    help="Indicate current version (Alembic 0.9.9 or greater is required)",
 )
 @click.pass_context
 def history(ctx: click.Context, directory, rev_range, verbose, indicate_current):
@@ -369,12 +369,12 @@ def current(ctx: click.Context, directory, verbose):
 @click.option(
     "--sql",
     is_flag=True,
-    help="Don't emit SQL to database - dump to standard output " "instead",
+    help="Don't emit SQL to database - dump to standard output instead",
 )
 @click.option(
     "--tag",
     default=None,
-    help='Arbitrary "tag" name - can be used by custom env.py ' "scripts",
+    help='Arbitrary "tag" name - can be used by custom env.py scripts',
 )
 @click.argument("revision", default="head")
 @click.pass_context
@@ -416,7 +416,7 @@ def check(ctx: click.Context, directory):
 @click.option(
     "--package",
     is_flag=True,
-    help="Write empty __init__.py files to the environment and " "version locations",
+    help="Write empty __init__.py files to the environment and version locations",
 )
 @click.pass_context
 def init(ctx: click.Context, directory, multiple, package):

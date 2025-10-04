@@ -73,9 +73,9 @@ class EllarSQLService:
 
     @property
     def engine(self) -> sa.Engine:
-        assert self._engines[self].get(
-            DEFAULT_KEY
-        ), f"{self.__class__.__name__} configuration is not ready"
+        assert self._engines[self].get(DEFAULT_KEY), (
+            f"{self.__class__.__name__} configuration is not ready"
+        )
         return self._engines[self][DEFAULT_KEY]
 
     def _setup(
