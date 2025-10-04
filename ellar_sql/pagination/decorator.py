@@ -74,9 +74,9 @@ class _PaginationOperation:
     ]:
         if isinstance(res, tuple):
             filter_query, extra_context = res
-            assert isinstance(
-                extra_context, dict
-            ), "When using as `template_context`, route function should return a tuple(select, {})"
+            assert isinstance(extra_context, dict), (
+                "When using as `template_context`, route function should return a tuple(select, {})"
+            )
 
         elif isinstance(res, dict):
             filter_query = None

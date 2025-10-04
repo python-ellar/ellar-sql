@@ -20,7 +20,9 @@ def main():
     session = db_service.session_factory()
 
     for i in range(50):
-        session.add(User(username=f"username-{i+1}", email=f"user{i+1}doe@example.com"))
+        session.add(
+            User(username=f"username-{i + 1}", email=f"user{i + 1}doe@example.com")
+        )
 
     session.commit()
     rows = session.execute(model.select(User)).scalars()

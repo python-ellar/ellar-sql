@@ -48,6 +48,15 @@ class File(BaseFile, AttributeDictAccessMixin):
 
     files: t.List[str]
 
+    # Type hints for dict-like methods from parent classes
+    if t.TYPE_CHECKING:
+
+        def get(self, __key: str, __default: t.Any = None) -> t.Any: ...
+
+        def __setitem__(self, __key: str, __value: t.Any) -> None: ...
+
+        def __getitem__(self, __key: str) -> t.Any: ...
+
     def __init__(
         self,
         content: t.Any = None,
