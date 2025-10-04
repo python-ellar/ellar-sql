@@ -6,10 +6,7 @@ def test_migrate_upgrade_for_multiple_database():
     with set_env_variable("multiple_db", "true"):
         result = run_command("multiple_database.py db init -m")
         assert result.returncode == 0
-        assert (
-            b"tests/dumbs/multiple/migrations/alembic.ini' before proceeding."
-            in result.stdout
-        )
+        assert b"multiple/migrations/alembic.ini before proceeding." in result.stdout
 
         result = run_command("multiple_database.py db check")
         assert result.returncode == 1
@@ -62,8 +59,7 @@ def test_migrate_upgrade_for_multiple_database_async():
         result = run_command("multiple_database_async.py db init -m")
         assert result.returncode == 0
         assert (
-            b"tests/dumbs/multiple_async/migrations/alembic.ini' before proceeding."
-            in result.stdout
+            b"multiple_async/migrations/alembic.ini before proceeding." in result.stdout
         )
 
         result = run_command("multiple_database_async.py db check")

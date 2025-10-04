@@ -19,6 +19,10 @@ T = t.TypeVar("T", bound=ModelBase)
 
 
 class EllarSQLOptions(SQLAlchemyOptions):
+    # Type hints for SQLAlchemy-specific attributes
+    sqlalchemy_get_or_create: t.Tuple[str, ...]
+    sqlalchemy_session_persistence: str
+
     @staticmethod
     def _check_has_sqlalchemy_session_set(meta, value):
         if value and hasattr(meta, "sqlalchemy_session"):
@@ -31,6 +35,7 @@ class EllarSQLFactory(SQLAlchemyModelFactory):
     """Factory for EllarSQL models."""
 
     _options_class = EllarSQLOptions
+    _meta: EllarSQLOptions
 
     class Meta:
         abstract = True

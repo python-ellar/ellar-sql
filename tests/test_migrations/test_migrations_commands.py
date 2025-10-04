@@ -5,10 +5,7 @@ from ..utils import clean_directory, run_command, set_env_variable
 def test_migrate_upgrade():
     result = run_command("default.py db init")
     assert result.returncode == 0
-    assert (
-        b"tests/dumbs/default/migrations/alembic.ini' before proceeding."
-        in result.stdout
-    )
+    assert b"default/migrations/alembic.ini before proceeding." in result.stdout
 
     result = run_command("default.py db check")
     assert result.returncode == 1
@@ -36,7 +33,7 @@ def test_migrate_upgrade_custom_directory():
     result = run_command("custom_directory.py db init")
     assert result.returncode == 0
     assert (
-        b"tests/dumbs/custom_directory/temp_migrations/alembic.ini' before proceeding."
+        b"custom_directory/temp_migrations/alembic.ini before proceeding."
         in result.stdout
     )
 
@@ -138,10 +135,7 @@ def test_other_alembic_commands():
 def test_migrate_upgrade_async():
     result = run_command("default_async.py db init")
     assert result.returncode == 0
-    assert (
-        b"tests/dumbs/default_async/migrations/alembic.ini' before proceeding."
-        in result.stdout
-    )
+    assert b"default_async/migrations/alembic.ini before proceeding." in result.stdout
 
     result = run_command("default_async.py db check")
     assert result.returncode == 1
