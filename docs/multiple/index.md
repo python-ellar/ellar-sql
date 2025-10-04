@@ -28,6 +28,23 @@ EllarSQLModule.setup(
 )
 ```
 
+## **Configuring Async Databases**
+When configuring async databases,
+you need to specify the `+asyncpg` or `+aiosqlite` suffix to the database URL in case of SQLite and PostgreSQL respectively.
+
+For example, to configure an async database, you can use the following configuration:
+```python
+from ellar_sql import EllarSQLModule
+
+EllarSQLModule.setup(
+    databases={
+        "default": "postgresql+asyncpg:///main",
+        "meta": "sqlite+aiosqlite:////path/to/meta.db",
+    },
+    migration_options={'directory': 'migrations'}
+)
+```
+
 ## **Defining Models and Tables with Different Databases**
 
 **EllarSQL** creates **Metadata** and an **Engine** for each configured database. 
