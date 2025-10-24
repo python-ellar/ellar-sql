@@ -16,7 +16,7 @@ def tm():
     test_module = Test.create_test_module(modules=[ApplicationModule])
     app = test_module.create_application()
 
-    with execute_async_context_manager(app.application_context()):
+    with execute_async_context_manager(app.with_injector_context()):
         yield test_module
 
 
