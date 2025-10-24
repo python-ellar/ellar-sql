@@ -30,11 +30,11 @@ def _invalid_configuration(message: str) -> t.Callable:
 async def _session_cleanup(
     db_service: EllarSQLService, session: t.Union[Session, AsyncSession]
 ) -> None:
-    res = db_service.session_factory.remove()
+    res = session.close()
     if isinstance(res, t.Coroutine):
         await res
 
-    res = session.close()
+    res = db_service.session_factory.remove()
     if isinstance(res, t.Coroutine):
         await res
 
