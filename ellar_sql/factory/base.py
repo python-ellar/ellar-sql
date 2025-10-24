@@ -1,5 +1,7 @@
+import inspect
 import typing as t
 
+import factory
 import sqlalchemy as sa
 import sqlalchemy.orm as sa_orm
 from ellar.threading import run_as_sync
@@ -118,3 +120,37 @@ class EllarSQLFactory(SQLAlchemyModelFactory):
             cls._session_execute(session.commit)
             cls._session_execute(session.refresh, obj)
         return obj
+
+
+class EllarSQLSubFactoryId(factory.SubFactory):
+    """
+    A SubFactory that returns the id of the created object.
+    """
+
+    def evaluate(self, instance, step, extra):
+        value = super().evaluate(instance, step, extra)
+        if inspect.isawaitable(value):
+
+            async def resolve_value():
+                resolved_value = await value
+                return resolved_value.id
+
+            return resolve_value()
+        return value
+
+
+class EllarSQLSubFactory(factory.SubFactory):
+    """
+    A SubFactory that returns the created object.
+    """
+
+    def evaluate(self, instance, step, extra):
+        value = super().evaluate(instance, step, extra)
+        if inspect.isawaitable(value):
+
+            async def resolve_value():
+                resolved_value = await value
+                return resolved_value
+
+            return resolve_value()
+        return value

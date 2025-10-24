@@ -27,6 +27,18 @@ def _invalid_configuration(message: str) -> t.Callable:
     return _raise_exception
 
 
+async def _session_cleanup(
+    db_service: EllarSQLService, session: t.Union[Session, AsyncSession]
+) -> None:
+    res = db_service.session_factory.remove()
+    if isinstance(res, t.Coroutine):
+        await res
+
+    res = session.close()
+    if isinstance(res, t.Coroutine):
+        await res
+
+
 @as_middleware
 async def session_middleware(
     context: IHostContext, call_next: t.Callable[..., t.Coroutine]
@@ -40,15 +52,8 @@ async def session_middleware(
 
     try:
         await call_next()
-    except Exception as ex:
-        res = session.rollback()
-        if isinstance(res, t.Coroutine):
-            await res
-        raise ex
-
-    res = db_service.session_factory.remove()
-    if isinstance(res, t.Coroutine):
-        await res
+    finally:
+        await _session_cleanup(db_service, session)
 
 
 @Module(
