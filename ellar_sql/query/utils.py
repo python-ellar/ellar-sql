@@ -19,7 +19,7 @@ async def get_or_404(
 ) -> _O:
     """ """
     db_service = current_injector.get(EllarSQLService)
-    session = db_service.get_scoped_session()()
+    session = db_service.session_factory_maker()()
 
     value = session.get(entity, ident, **kwargs)
 
@@ -39,7 +39,7 @@ async def get_or_none(
 ) -> t.Optional[_O]:
     """ """
     db_service = current_injector.get(EllarSQLService)
-    session = db_service.get_scoped_session()()
+    session = db_service.session_factory_maker()()
 
     value = session.get(entity, ident, **kwargs)
 

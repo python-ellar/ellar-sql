@@ -1,6 +1,5 @@
 import os
 import typing as t
-from threading import get_ident
 from weakref import WeakKeyDictionary
 
 import sqlalchemy as sa
@@ -14,7 +13,6 @@ from ellar.utils.importer import (
 )
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
-    async_scoped_session,
     async_sessionmaker,
 )
 
@@ -32,6 +30,10 @@ from .metadata_engine import MetaDataEngine
 
 
 class EllarSQLService:
+    session_factory: t.Union[
+        sa_orm.sessionmaker[sa_orm.Session], async_sessionmaker[AsyncSession]
+    ]
+
     def __init__(
         self,
         databases: t.Union[str, t.Dict[str, t.Any]],
@@ -61,7 +63,7 @@ class EllarSQLService:
         self._has_async_engine_driver: bool = False
 
         self._setup(databases, models=models, echo=echo)
-        self.session_factory = self.get_scoped_session()
+        self.session_factory = self.session_factory_maker()
 
     @property
     def has_async_engine_driver(self) -> bool:
@@ -177,24 +179,16 @@ class EllarSQLService:
                 continue
             metadata_engine.reflect()
 
-    def get_scoped_session(
+    def session_factory_maker(
         self,
         **extra_options: t.Any,
-    ) -> t.Union[
-        sa_orm.scoped_session[sa_orm.Session],
-        async_scoped_session[t.Union[AsyncSession, t.Any]],
-    ]:
+    ) -> t.Union[sa_orm.sessionmaker[sa_orm.Session], async_sessionmaker[AsyncSession]]:
         options = self._session_options.copy()
         options.update(extra_options)
 
-        scope = options.pop("scopefunc", get_ident)
+        scope = options.pop("scopefunc", None)  # noqa: F841
 
-        factory = self._make_session_factory(options)
-
-        if self.has_async_engine_driver:
-            return async_scoped_session(factory, scope)  # type:ignore[arg-type]
-
-        return sa_orm.scoped_session(factory, scope)  # type:ignore[arg-type]
+        return self._make_session_factory(options)
 
     def _make_session_factory(
         self, options: t.Dict[str, t.Any]
