@@ -286,7 +286,7 @@ class Paginator(PaginatorBase):
     def _get_session(self) -> t.Union[sa_orm.Session, AsyncSession, t.Any]:
         self._created_session = True
         service = current_injector.get(EllarSQLService)
-        return service.get_scoped_session()()
+        return service.session_factory_maker()()
 
     def _query_items(self) -> t.List[t.Any]:
         if self._is_async:

@@ -64,13 +64,14 @@ def create_group_model(**kwargs):
 
 class TestModelFactory:
     def test_model_factory(self, db_service, ignore_base):
+        session = db_service.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_COMMIT,
             },
             group={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_COMMIT,
             },
         )
@@ -79,15 +80,16 @@ class TestModelFactory:
 
         group = group_factory()
         assert group.dict().keys() == {"name", "user_id", "id"}
-        db_service.session_factory.close()
+        session.close()
 
     def test_model_factory_session_none(self, db_service, ignore_base):
+        session = db_service.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
             },
             group={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
             },
         )
 
@@ -96,16 +98,17 @@ class TestModelFactory:
         group = group_factory()
         assert f"<Group (pending {id(group)})>" == repr(group)
         assert group.dict().keys() != {"name", "user_id", "id"}
-        db_service.session_factory.close()
+        session.close()
 
     def test_model_factory_session_flush(self, db_service, ignore_base):
+        session = db_service.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
             },
             group={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
             },
         )
@@ -114,16 +117,17 @@ class TestModelFactory:
 
         group = group_factory()
         assert group.dict().keys() == {"name", "user_id", "id"}
-        db_service.session_factory.close()
+        session.close()
 
     def test_model_factory_get_or_create(self, db_service, ignore_base):
+        session = db_service.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_COMMIT,
             },
             group={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_COMMIT,
                 "sqlalchemy_get_or_create": ("name",),
             },
@@ -141,18 +145,19 @@ class TestModelFactory:
 
         assert group.dict() == group2.dict() != group3.dict()
 
-        db_service.session_factory.close()
+        session.close()
 
     def test_model_factory_get_or_create_for_integrity_error(
         self, db_service, ignore_base
     ):
+        session = db_service.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_COMMIT,
             },
             group={
-                "sqlalchemy_session_factory": db_service.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_COMMIT,
                 "sqlalchemy_get_or_create": ("name",),
             },
@@ -164,19 +169,20 @@ class TestModelFactory:
         with pytest.raises(IntegrityError):
             group_factory(name="new group", user=group.user)
 
-        db_service.session_factory.close()
+        session.close()
 
 
 @pytest.mark.asyncio
 class TestModelFactoryAsync:
     async def test_model_factory_async(self, db_service_async, ignore_base):
+        session = db_service_async.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_COMMIT,
             },
             group={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_COMMIT,
             },
         )
@@ -185,17 +191,18 @@ class TestModelFactoryAsync:
 
         group = group_factory()
         assert group.dict().keys() == {"name", "user_id", "id"}
-        await db_service_async.session_factory.close()
+        await session.close()
 
     async def test_model_factory_session_none_async(
         self, db_service_async, ignore_base
     ):
+        session = db_service_async.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
             },
             group={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
             },
         )
 
@@ -204,18 +211,19 @@ class TestModelFactoryAsync:
         group = group_factory()
         assert f"<Group (pending {id(group)})>" == repr(group)
         assert group.dict().keys() != {"name", "user_id", "id"}
-        await db_service_async.session_factory.close()
+        await session.close()
 
     async def test_model_factory_session_flush_async(
         self, db_service_async, ignore_base
     ):
+        session = db_service_async.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
             },
             group={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
             },
         )
@@ -224,18 +232,19 @@ class TestModelFactoryAsync:
 
         group = group_factory()
         assert group.dict().keys() == {"name", "user_id", "id"}
-        await db_service_async.session_factory.close()
+        await session.close()
 
     async def test_model_factory_get_or_create_async(
         self, db_service_async, ignore_base
     ):
+        session = db_service_async.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
             },
             group={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
                 "sqlalchemy_get_or_create": ("name",),
             },
@@ -252,19 +261,19 @@ class TestModelFactoryAsync:
         assert group.id == group2.id
 
         assert group.dict() == group2.dict() != group3.dict()
-
-        await db_service_async.session_factory.close()
+        await session.close()
 
     async def test_model_factory_get_or_create_for_integrity_error_async(
         self, db_service_async, ignore_base
     ):
+        session = db_service_async.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
             },
             group={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
                 "sqlalchemy_get_or_create": ("name",),
             },
@@ -275,19 +284,19 @@ class TestModelFactoryAsync:
 
         with pytest.raises(IntegrityError):
             group_factory(name="new group", user=group.user)
-
-        await db_service_async.session_factory.close()
+        await session.close()
 
     async def test_model_factory_get_or_create_raises_error_for_missing_field_async(
         self, db_service_async, ignore_base
     ):
+        session = db_service_async.session_factory()
         group_factory = create_group_model(
             user={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
             },
             group={
-                "sqlalchemy_session_factory": db_service_async.session_factory,
+                "sqlalchemy_session": session,
                 "sqlalchemy_session_persistence": SESSION_PERSISTENCE_FLUSH,
                 "sqlalchemy_get_or_create": ("name", "user_id"),
             },
@@ -295,5 +304,4 @@ class TestModelFactoryAsync:
         db_service_async.create_all()
         with pytest.raises(FactoryError):
             group_factory()
-
-        await db_service_async.session_factory.close()
+        await session.close()

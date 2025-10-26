@@ -27,33 +27,32 @@ def _invalid_configuration(message: str) -> t.Callable:
     return _raise_exception
 
 
-async def _session_cleanup(
-    db_service: EllarSQLService, session: t.Union[Session, AsyncSession]
-) -> None:
-    res = session.close()
-    if isinstance(res, t.Coroutine):
-        await res
-
-    res = db_service.session_factory.remove()
-    if isinstance(res, t.Coroutine):
-        await res
-
-
 @as_middleware
 async def session_middleware(
     context: IHostContext, call_next: t.Callable[..., t.Coroutine]
 ):
     connection = context.switch_to_http_connection().get_client()
-
     db_service = context.get_service_provider().get(EllarSQLService)
-    session = db_service.session_factory()
 
+    # Create a NEW session for this request
+    session = db_service.session_factory()
     connection.state.session = session
 
     try:
         await call_next()
+    except Exception as ex:
+        # Only rollback if session is still active
+        if session.is_active and session.in_transaction():
+            res = session.rollback()
+            if isinstance(res, t.Coroutine):
+                await res
+        raise ex
     finally:
-        await _session_cleanup(db_service, session)
+        # Always clean up
+        if session.is_active:
+            res = session.close()
+            if isinstance(res, t.Coroutine):
+                await res
 
 
 @Module(
